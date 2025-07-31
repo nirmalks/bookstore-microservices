@@ -1,10 +1,14 @@
 package com.nirmalks.user_service.user.controller;
 
+import com.nirmalks.user_service.address.mapper.AddressMapper;
 import com.nirmalks.user_service.user.api.CreateUserRequest;
 import com.nirmalks.user_service.user.api.UpdateUserRequest;
 import com.nirmalks.user_service.user.api.UserResponse;
 import com.nirmalks.user_service.user.entity.UserRole;
 import com.nirmalks.user_service.user.service.UserService;
+import dto.AddressDto;
+import dto.AddressRequest;
+import dto.AddressRequestWithUserId;
 import dto.PageRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -115,5 +119,16 @@ public class UserController {
         var location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(userResponse.getId()).toUri();
         return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, String.valueOf(location)).body(userResponse);
+    }
+
+    @PostMapping("/address")
+    @Operation(summary = "Update user address", description = "Update user address during order")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Address updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input or username/email already exists")
+    })
+    public ResponseEntity<AddressDto> updateAddress(@RequestBody @Valid AddressRequestWithUserId addressRequest) {
+        var address = userService.updateAddress(addressRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(address);
     }
 }

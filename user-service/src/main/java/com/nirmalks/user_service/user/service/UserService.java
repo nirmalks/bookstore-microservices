@@ -5,6 +5,8 @@ import com.nirmalks.user_service.user.api.CreateUserRequest;
 import com.nirmalks.user_service.user.api.UpdateUserRequest;
 import com.nirmalks.user_service.user.api.UserResponse;
 import com.nirmalks.user_service.user.entity.UserRole;
+import dto.AddressDto;
+import dto.AddressRequestWithUserId;
 import dto.PageRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -17,4 +19,5 @@ public interface UserService {
     UserResponse updateUser(Long id, UpdateUserRequest userRequest);
     void deleteUser(Long userId);
     LoginResponse authenticate(String username, String password);
+    AddressDto updateAddress(AddressRequestWithUserId addressRequest);
 }

@@ -1,0 +1,9 @@
+package com.nirmalks.catalog_service.author.repository;
+
+import com.nirmalks.catalog_service.author.entity.Author;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface AuthorRepository extends JpaRepository<Author, Long> {
+}

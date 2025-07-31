@@ -1,5 +1,8 @@
 package com.nirmalks.user_service.user.service.impl;
 
+import com.nirmalks.user_service.address.Address;
+import com.nirmalks.user_service.address.mapper.AddressMapper;
+import com.nirmalks.user_service.address.repository.AddressRepository;
 import com.nirmalks.user_service.auth.api.LoginResponse;
 import com.nirmalks.user_service.user.api.CreateUserRequest;
 import com.nirmalks.user_service.user.api.UpdateUserRequest;
@@ -9,6 +12,8 @@ import com.nirmalks.user_service.user.entity.User;
 import com.nirmalks.user_service.user.entity.UserRole;
 import com.nirmalks.user_service.user.repository.UserRepository;
 import com.nirmalks.user_service.user.service.UserService;
+import dto.AddressDto;
+import dto.AddressRequestWithUserId;
 import exceptions.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import security.JwtUtils;
@@ -26,6 +31,9 @@ import static common.RequestUtils.getPageable;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -79,6 +87,14 @@ public class UserServiceImpl implements UserService {
         loginResponse.setUserId(user.getId());
         loginResponse.setRole(user.getRole().name());
         return loginResponse;
+    }
+
+    @Override
+    public AddressDto updateAddress(AddressRequestWithUserId addressRequest) {
+        var user = userRepository.findById(addressRequest.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        var address = AddressMapper.toEntity(addressRequest);
+        address.setUser(user);
+        return AddressMapper.toDto(addressRepository.save(address));
     }
 }
 
