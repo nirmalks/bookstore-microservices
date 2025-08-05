@@ -1,4 +1,4 @@
-package com.nirmalks.user_service.user.entity;
+package dto;
 
 public enum UserRole {
     ADMIN,

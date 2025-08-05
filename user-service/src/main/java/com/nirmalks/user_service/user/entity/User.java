@@ -1,13 +1,12 @@
 package com.nirmalks.user_service.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import dto.UserRole;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @Entity(name = "users")
 public class User {
@@ -21,7 +20,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, columnDefinition = "user_role_enum")
     @Enumerated(EnumType.STRING)
     private UserRole role;
 

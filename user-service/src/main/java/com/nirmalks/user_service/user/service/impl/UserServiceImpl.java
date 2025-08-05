@@ -1,6 +1,5 @@
 package com.nirmalks.user_service.user.service.impl;
 
-import com.nirmalks.user_service.address.Address;
 import com.nirmalks.user_service.address.mapper.AddressMapper;
 import com.nirmalks.user_service.address.repository.AddressRepository;
 import com.nirmalks.user_service.auth.api.LoginResponse;
@@ -9,11 +8,11 @@ import com.nirmalks.user_service.user.api.UpdateUserRequest;
 import com.nirmalks.user_service.user.api.UserResponse;
 import com.nirmalks.user_service.user.dto.UserMapper;
 import com.nirmalks.user_service.user.entity.User;
-import com.nirmalks.user_service.user.entity.UserRole;
 import com.nirmalks.user_service.user.repository.UserRepository;
 import com.nirmalks.user_service.user.service.UserService;
 import dto.AddressDto;
 import dto.AddressRequestWithUserId;
+import dto.UserRole;
 import exceptions.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import security.JwtUtils;
@@ -51,6 +50,8 @@ public class UserServiceImpl implements UserService {
         String encryptedPassword = SecurityUtils.encode(userRequest.getPassword(), passwordEncoder);
         userRequest.setPassword(encryptedPassword);
         User user = UserMapper.toEntity(userRequest, role);
+        System.out.println("role" + role);
+        System.out.println("user" + user);
         userRepository.save(user);
         return UserMapper.toResponse(user);
     }

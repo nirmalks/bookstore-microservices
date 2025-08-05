@@ -1,15 +1,13 @@
 package com.nirmalks.user_service.user.controller;
 
-import com.nirmalks.user_service.address.mapper.AddressMapper;
 import com.nirmalks.user_service.user.api.CreateUserRequest;
 import com.nirmalks.user_service.user.api.UpdateUserRequest;
 import com.nirmalks.user_service.user.api.UserResponse;
-import com.nirmalks.user_service.user.entity.UserRole;
 import com.nirmalks.user_service.user.service.UserService;
 import dto.AddressDto;
-import dto.AddressRequest;
 import dto.AddressRequestWithUserId;
 import dto.PageRequestDto;
+import dto.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -27,8 +25,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/users")
-@SecurityRequirement(name = "bearerAuth") // Assuming most user operations require authentication
-@Tag(name = "User Management", description = "Operations related to user accounts and profiles") // Added Tag
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "User Management", description = "Operations related to user accounts and profiles")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -102,6 +100,7 @@ public class UserController {
     })
     public ResponseEntity<UserResponse> registerUser(@RequestBody @Valid CreateUserRequest userRequest) {
         var userResponse = userService.createUser(userRequest, UserRole.CUSTOMER);
+
         var location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(userResponse.getId()).toUri();
         return ResponseEntity.status(HttpStatus.CREATED).header(HttpHeaders.LOCATION, String.valueOf(location)).body(userResponse);

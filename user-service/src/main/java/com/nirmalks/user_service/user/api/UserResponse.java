@@ -1,7 +1,6 @@
 package com.nirmalks.user_service.user.api;
 
-
-import com.nirmalks.user_service.user.entity.UserRole;
+import dto.UserRole;
 
 public class UserResponse {
     private Long id;

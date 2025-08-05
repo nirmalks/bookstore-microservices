@@ -1,6 +1,6 @@
 package com.nirmalks.user_service.user.api;
 
-import com.nirmalks.user_service.user.entity.UserRole;
+import dto.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

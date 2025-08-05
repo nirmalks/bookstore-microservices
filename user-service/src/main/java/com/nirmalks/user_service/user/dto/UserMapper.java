@@ -1,11 +1,10 @@
 package com.nirmalks.user_service.user.dto;
 
-
 import com.nirmalks.user_service.user.api.CreateUserRequest;
 import com.nirmalks.user_service.user.api.UpdateUserRequest;
 import com.nirmalks.user_service.user.api.UserResponse;
 import com.nirmalks.user_service.user.entity.User;
-import com.nirmalks.user_service.user.entity.UserRole;
+import dto.UserRole;
 
 public class UserMapper {
     public static UserDto toDto(User user) {
