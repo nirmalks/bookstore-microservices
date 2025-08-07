@@ -1,138 +1,151 @@
 package com.nirmalks.bookstore.auth_server.security;
-
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.core.oidc.OidcScopes;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
+import org.springframework.security.oauth2.core.OAuth2Token;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Duration;
 import java.util.Collections;
-import java.util.UUID;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
-    private final CustomUserDetailsService userDetailsService;
-    private final JdbcTemplate jdbcTemplate;
-
-    public SecurityConfig(CustomUserDetailsService userDetailsService, JdbcTemplate jdbcTemplate) {
-        this.userDetailsService = userDetailsService;
-        this.jdbcTemplate = jdbcTemplate;
-    }
-    @Bean
-    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-        return new ProviderManager(Collections.singletonList(authenticationProvider));
-    }
 
     @Bean
-    @Order(1)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
+                                                          PasswordAuthenticationProvider passwordAuthProvider,
+                                                          PasswordAuthenticationConverter passwordAuthenticationConverter) throws Exception {
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
 
-        http.getConfigurer(OAuth2AuthorizationServerConfigurer.class).oidc(Customizer.withDefaults());
+        authorizationServerConfigurer.tokenEndpoint(tokenEndpoint ->
+                tokenEndpoint
+                        .accessTokenRequestConverter(passwordAuthenticationConverter)
+                        .authenticationProvider(passwordAuthProvider)
+        );
 
-        return http
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+        http
+                .authorizeHttpRequests(authorize ->
+                        authorize.anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/token"))
+                .apply(authorizationServerConfigurer);
+
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(PasswordAuthenticationProvider provider) {
+        return new ProviderManager(provider);
+    }
+
+    @Bean
+    public PasswordAuthenticationProvider passwordAuthenticationProvider(WebClient webClient, OAuth2AuthorizationService authorizationService,
+                                                                         OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
+        return new PasswordAuthenticationProvider(authorizationService, tokenGenerator);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
+    }
+
+    @Bean
+    public RegisteredClientRepository registeredClientRepository() {
+        RegisteredClient client = RegisteredClient.withId("local-client-id")
+                .clientId("local-client")
+                .clientSecret("secret")
+                .authorizationGrantType(new AuthorizationGrantType("password"))
+                .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                .scope("read")
+                .tokenSettings(TokenSettings.builder()
+                        .accessTokenTimeToLive(Duration.ofHours(1))
+                        .refreshTokenTimeToLive(Duration.ofDays(30))
+                        .build())
                 .build();
+        return new InMemoryRegisteredClientRepository(client);
     }
 
-
     @Bean
-    public RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
-        return new JdbcRegisteredClientRepository(jdbcTemplate);
+    public PasswordAuthenticationConverter passwordAuthenticationConverter(
+            RegisteredClientRepository registeredClientRepository) {
+        return new PasswordAuthenticationConverter(registeredClientRepository);
     }
     @Bean
-    public CommandLineRunner initRegisteredClients(RegisteredClientRepository registeredClientRepository, PasswordEncoder passwordEncoder) {
-        return args -> {
-            // Define bookstore client
-            RegisteredClient bookstoreClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                    .clientId("bookstore-client")
-                    .clientSecret(passwordEncoder.encode("bookstore-secret"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                    .authorizationGrantType(AuthorizationGrantType.PASSWORD) // Consider if PASSWORD grant type is truly needed and secure
-                    .redirectUri("http://127.0.0.1:8080/login/oauth2/code/bookstore-client")
-                    .scope(OidcScopes.OPENID)
-                    .scope("read")
-                    .scope("write")
-                    .build();
-
-            // Define internal client
-            RegisteredClient internalClient = RegisteredClient.withId(UUID.randomUUID().toString())
-                    .clientId("auth-server-client")
-                    .clientSecret(passwordEncoder.encode("auth-server-secret"))
-                    .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                    .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                    .scope("internal_api")
-                    .build();
-
-            // Check if clients exist and save them if they don't
-            if (registeredClientRepository.findByClientId("bookstore-client") == null) {
-                registeredClientRepository.save(bookstoreClient);
-                System.out.println("Bookstore client registered.");
-            } else {
-                System.out.println("Bookstore client already exists.");
-            }
-
-            if (registeredClientRepository.findByClientId("auth-server-client") == null) {
-                registeredClientRepository.save(internalClient);
-                System.out.println("Internal client registered.");
-            } else {
-                System.out.println("Internal client already exists.");
-            }
-        };
+    public OAuth2AuthorizationService authorizationService(RegisteredClientRepository registeredClientRepository) {
+        return new InMemoryOAuth2AuthorizationService();
+    }
+    @Bean
+    public OAuth2TokenGenerator<?> tokenGenerator(JwtEncoder jwtEncoder, OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer) {
+        JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
+        jwtGenerator.setJwtCustomizer(jwtCustomizer);
+        return new DelegatingOAuth2TokenGenerator(
+                jwtGenerator,
+                new OAuth2AccessTokenGenerator(),
+                new OAuth2RefreshTokenGenerator()
+        );
     }
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
         RSAKey rsaKey = Jwks.generateRsa();
         JWKSet jwkSet = new JWKSet(rsaKey);
-        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+        return new ImmutableJWKSet<>(jwkSet);
     }
 
     @Bean
-    public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-        return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
+    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
+        return context -> {
+            if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+                Authentication principal = context.getPrincipal();
+
+                context.getClaims().claim("username", principal.getName());
+
+
+//                context.getClaims().claim("roles", principal.getAuthorities());
+                context.getClaims().claims((claims) -> {
+                    Set<String> roles = AuthorityUtils.authorityListToSet(context.getPrincipal().getAuthorities())
+                            .stream()
+                            .map(c -> c.replaceFirst("^ROLE_", ""))
+                            .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+                    claims.put("roles", roles);
+                });
+                System.out.println("JWT custom claims injected for: " + principal.getName());
+            }
+        };
     }
+
+
+
 }

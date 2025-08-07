@@ -15,40 +15,26 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @Configuration
 public class WebclientConfig {
-    @Bean("customReactiveClientRegistration")
-    public ReactiveClientRegistrationRepository clientRegistrationRepository() {
-        ClientRegistration clientRegistration = ClientRegistration
-                .withRegistrationId("auth-server-client")
-                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .clientId("auth-server-client")
-                .clientSecret("auth-server-secret")
-                .tokenUri("http://localhost:9000/oauth2/token")
-                .scope("internal_api")
-                .build();
+//    @Bean("customReactiveClientRegistration")
+//    public ReactiveClientRegistrationRepository clientRegistrations() {
+//        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("auth-server-client")
+//                .tokenUri("http://localhost:9000/oauth2/token")
+//                .clientId("auth-server-client")
+//                .clientSecret("{noop}auth-server-secret")
+//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+//                .scope("internal_api")
+//                .build();
+//
+//        return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
+//    }
+//
 
-        return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
-    }
-
-    @Bean
-    public AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager(
-            ReactiveClientRegistrationRepository clientRegistrationRepository) {
-        return new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
-                clientRegistrationRepository,
-                new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrationRepository)
-        );
-    }
-
-    @Bean
-    public WebClient webClient(AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager,
-                               @Value("${user-service.base-url}") String userServiceBaseUrl) {
-        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
-                new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oauth2Client.setDefaultClientRegistrationId("auth-server-client");
-
-        return WebClient.builder()
-                .baseUrl(userServiceBaseUrl)
-                .filter(oauth2Client)
-                .build();
-    }
+        @Bean
+        public WebClient userServiceWebClient(@Value("${user-service.base-url}") String userServiceBaseUrl) {
+            return WebClient.builder()
+                    .baseUrl(userServiceBaseUrl)
+                    .defaultHeader("X-Internal-Service", "auth-server")
+                    .build();
+        }
 }

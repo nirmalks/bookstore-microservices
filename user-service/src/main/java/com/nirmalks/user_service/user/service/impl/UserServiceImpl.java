@@ -10,13 +10,10 @@ import com.nirmalks.user_service.user.dto.UserMapper;
 import com.nirmalks.user_service.user.entity.User;
 import com.nirmalks.user_service.user.repository.UserRepository;
 import com.nirmalks.user_service.user.service.UserService;
-import dto.AddressDto;
-import dto.AddressRequestWithUserId;
-import dto.UserRole;
+import dto.*;
 import exceptions.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import security.JwtUtils;
-import dto.PageRequestDto;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -88,6 +85,20 @@ public class UserServiceImpl implements UserService {
         loginResponse.setUserId(user.getId());
         loginResponse.setRole(user.getRole().name());
         return loginResponse;
+    }
+
+    @Override
+    public UserDto internalAuthenticate(String username, String password) {
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+
+        if (!SecurityUtils.matches(password, user.getPassword(), passwordEncoder)) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
+        UserDto userDto = new UserDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setHashedPassword(user.getPassword());
+        userDto.setRole(user.getRole());
+        return userDto;
     }
 
     @Override

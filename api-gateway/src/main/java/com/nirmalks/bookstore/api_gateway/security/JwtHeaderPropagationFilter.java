@@ -41,6 +41,7 @@ public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
                         String rolesClaim = "roles";
                         if (jwt.hasClaim(rolesClaim)) {
                             String roles = jwt.getClaimAsString(rolesClaim);
+                            System.out.println("roles str" + roles);
                             if (roles != null) {
                                 builder.header("X-User-Roles", roles);
                                 System.out.println("Added roles from claim: " + roles);
