@@ -11,7 +11,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.OAuth2Token;
@@ -50,12 +50,10 @@ public class SecurityConfig {
                         .authenticationProvider(passwordAuthProvider)
         );
 
-        http
-                .authorizeHttpRequests(authorize ->
-                        authorize.anyRequest().authenticated()
-                )
+        http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/token"))
-                .apply(authorizationServerConfigurer);
+                .with(authorizationServerConfigurer, customizer -> {});
 
         return http.build();
     }
@@ -73,14 +71,14 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId("local-client-id")
                 .clientId("local-client")
-                .clientSecret("secret")
+                .clientSecret(passwordEncoder().encode("secret"))
                 .authorizationGrantType(new AuthorizationGrantType("password"))
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .scope("read")
@@ -131,9 +129,6 @@ public class SecurityConfig {
                 Authentication principal = context.getPrincipal();
 
                 context.getClaims().claim("username", principal.getName());
-
-
-//                context.getClaims().claim("roles", principal.getAuthorities());
                 context.getClaims().claims((claims) -> {
                     Set<String> roles = AuthorityUtils.authorityListToSet(context.getPrincipal().getAuthorities())
                             .stream()
@@ -141,11 +136,7 @@ public class SecurityConfig {
                             .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
                     claims.put("roles", roles);
                 });
-                System.out.println("JWT custom claims injected for: " + principal.getName());
             }
         };
     }
-
-
-
 }
