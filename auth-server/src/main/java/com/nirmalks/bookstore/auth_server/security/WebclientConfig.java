@@ -15,26 +15,46 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @Configuration
 public class WebclientConfig {
-//    @Bean("customReactiveClientRegistration")
-//    public ReactiveClientRegistrationRepository clientRegistrations() {
-//        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("auth-server-client")
-//                .tokenUri("http://localhost:9000/oauth2/token")
-//                .clientId("auth-server-client")
-//                .clientSecret("{noop}auth-server-secret")
-//                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-//                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//                .scope("internal_api")
-//                .build();
-//
-//        return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
-//    }
-//
+    @Bean("userServiceClientRegistration")
+    public ReactiveClientRegistrationRepository clientRegistrations() {
+        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("auth-server-client-id")
+                .tokenUri("http://localhost:9000/oauth2/token")
+                .clientId("auth-server-client")
+                .clientSecret("auth-server-secret")
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .scope("internal_api")
+                .build();
 
-        @Bean
-        public WebClient userServiceWebClient(@Value("${user-service.base-url}") String userServiceBaseUrl) {
-            return WebClient.builder()
-                    .baseUrl(userServiceBaseUrl)
-                    .defaultHeader("X-Internal-Service", "auth-server")
-                    .build();
-        }
+        return new InMemoryReactiveClientRegistrationRepository(clientRegistration);
+    }
+
+    @Bean
+    public InMemoryReactiveOAuth2AuthorizedClientService authorizedClientService(
+            ReactiveClientRegistrationRepository clientRegistrations) {
+        return new InMemoryReactiveOAuth2AuthorizedClientService(clientRegistrations);
+    }
+
+    @Bean
+    public AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager(
+            ReactiveClientRegistrationRepository clientRegistrations,
+            InMemoryReactiveOAuth2AuthorizedClientService authorizedClientService) {
+        return new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(clientRegistrations, authorizedClientService);
+    }
+
+    @Bean("userServiceWebClient")
+    public WebClient userServiceWebClient(
+            @Value("${user-service.base-url}") String userServiceBaseUrl,
+            AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager authorizedClientManager) {
+
+        ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2 =
+                new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
+
+        oauth2.setDefaultClientRegistrationId("auth-server-client-id");
+
+        return WebClient.builder()
+                .baseUrl(userServiceBaseUrl)
+                .filter(oauth2)
+                .build();
+    }
 }

@@ -8,18 +8,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2Token;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientCredentialsAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -31,6 +36,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,7 +72,7 @@ public class SecurityConfig {
     @Bean
     public PasswordAuthenticationProvider passwordAuthenticationProvider(WebClient webClient, OAuth2AuthorizationService authorizationService,
                                                                          OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator) {
-        return new PasswordAuthenticationProvider(authorizationService, tokenGenerator);
+        return new PasswordAuthenticationProvider(authorizationService, tokenGenerator, webClient);
     }
 
     @Bean
@@ -87,7 +93,15 @@ public class SecurityConfig {
                         .refreshTokenTimeToLive(Duration.ofDays(30))
                         .build())
                 .build();
-        return new InMemoryRegisteredClientRepository(client);
+
+        RegisteredClient internalClient = RegisteredClient.withId("auth-server-client-id")
+                .clientId("auth-server-client")
+                .clientSecret(passwordEncoder().encode("auth-server-secret"))
+                .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .scope("internal_api")
+                .build();
+        return new InMemoryRegisteredClientRepository(client, internalClient);
     }
 
     @Bean
@@ -127,15 +141,29 @@ public class SecurityConfig {
         return context -> {
             if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
                 Authentication principal = context.getPrincipal();
+                System.out.println("principle " + principal);
+                // Case 1: User authentication (password grant)
+                if (principal instanceof UsernamePasswordAuthenticationToken) {
+                    context.getClaims().claim("username", principal.getName());
+                    List<String> roles = principal.getAuthorities().stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .collect(Collectors.toList());
+                    context.getClaims().claim("roles", roles);
+                    System.out.println("JWT custom claims injected for user: " + principal.getName());
+                }
 
-                context.getClaims().claim("username", principal.getName());
-                context.getClaims().claims((claims) -> {
-                    Set<String> roles = AuthorityUtils.authorityListToSet(context.getPrincipal().getAuthorities())
-                            .stream()
-                            .map(c -> c.replaceFirst("^ROLE_", ""))
-                            .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
-                    claims.put("roles", roles);
-                });
+                // Case 2: Internal client authentication (client credentials grant)
+                else if (principal instanceof OAuth2ClientAuthenticationToken) {
+                    // Extract client_id from the principal and add it as a claim
+                    String clientId = principal.getName();
+                    context.getClaims().claim("client_id", clientId);
+
+                    // CRITICAL FIX: Get scopes directly from the RegisteredClient, not the principal
+                    Set<String> scopes = context.getRegisteredClient().getScopes();
+                    context.getClaims().claim("scope", scopes);
+                    System.out.println("scopes" + scopes);
+                    System.out.println("JWT custom claims injected for internal client: " + clientId + " with scopes: " + scopes);
+                }
             }
         };
     }

@@ -14,11 +14,6 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.stream.Collectors;
 
 public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
-
-    public JwtHeaderPropagationFilter() {
-        System.out.println("JwtHeaderPropagationFilter initialized!");
-    }
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         System.out.println("JwtHeaderPropagationFilter: Processing path: " + exchange.getRequest().getPath());
@@ -37,27 +32,22 @@ public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
                             System.out.println("Added User ID header: " + userId);
                         }
 
-                        // Try roles claim first
                         String rolesClaim = "roles";
                         if (jwt.hasClaim(rolesClaim)) {
                             String roles = jwt.getClaimAsString(rolesClaim);
                             System.out.println("roles str" + roles);
                             if (roles != null) {
                                 builder.header("X-User-Roles", roles);
-                                System.out.println("Added roles from claim: " + roles);
                             }
                         } else {
-                            // Fall back to authorities
                             String authorities = authentication.getAuthorities().stream()
                                     .map(GrantedAuthority::getAuthority)
                                     .collect(Collectors.joining(","));
                             if (!authorities.isEmpty()) {
                                 builder.header("X-User-Roles", authorities);
-                                System.out.println("Added roles from authorities: " + authorities);
                             }
                         }
                     }
-
                     return exchange.mutate().request(builder.build()).build();
                 })
                 .defaultIfEmpty(exchange)
