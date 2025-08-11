@@ -12,7 +12,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -24,19 +23,19 @@ import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2Au
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientCredentialsAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,18 +46,18 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
                                                           PasswordAuthenticationProvider passwordAuthProvider,
                                                           PasswordAuthenticationConverter passwordAuthenticationConverter) throws Exception {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                new OAuth2AuthorizationServerConfigurer();
-
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         authorizationServerConfigurer.tokenEndpoint(tokenEndpoint ->
                 tokenEndpoint
                         .accessTokenRequestConverter(passwordAuthenticationConverter)
                         .authenticationProvider(passwordAuthProvider)
+                        .accessTokenResponseHandler(new CustomAccessTokenResponseHandler())
         );
+
 
         http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/token"))
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/oauth2/token"))
                 .with(authorizationServerConfigurer, customizer -> {});
 
         return http.build();
@@ -141,30 +140,39 @@ public class SecurityConfig {
         return context -> {
             if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
                 Authentication principal = context.getPrincipal();
-                System.out.println("principle " + principal);
-                // Case 1: User authentication (password grant)
                 if (principal instanceof UsernamePasswordAuthenticationToken) {
-                    context.getClaims().claim("username", principal.getName());
-                    List<String> roles = principal.getAuthorities().stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toList());
-                    context.getClaims().claim("roles", roles);
-                    System.out.println("JWT custom claims injected for user: " + principal.getName());
+                    CustomUserDetails userDetails = (CustomUserDetails) principal.getPrincipal();
+
+                    Long userId = userDetails.getId();
+                    System.out.println("uid" + userId);
+                    String username = userDetails.getUsername();
+                    System.out.println("usernma" + username);
+                    if (userId != null && username != null) {
+                        context.getClaims().subject(userId.toString());
+                        context.getClaims().claim("username", username);
+
+                        List<String> roles = userDetails.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList());
+                        context.getClaims().claim("roles", roles);
+                    } else {
+                        System.err.println("Cannot create JWT: userId or username is null for authenticated user.");
+                    }
                 }
-
-                // Case 2: Internal client authentication (client credentials grant)
+                // Case for internal client authentication (client credentials grant)
                 else if (principal instanceof OAuth2ClientAuthenticationToken) {
-                    // Extract client_id from the principal and add it as a claim
                     String clientId = principal.getName();
-                    context.getClaims().claim("client_id", clientId);
-
-                    // CRITICAL FIX: Get scopes directly from the RegisteredClient, not the principal
                     Set<String> scopes = context.getRegisteredClient().getScopes();
-                    context.getClaims().claim("scope", scopes);
-                    System.out.println("scopes" + scopes);
                     System.out.println("JWT custom claims injected for internal client: " + clientId + " with scopes: " + scopes);
                 }
             }
         };
+    }
+
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings() {
+        return AuthorizationServerSettings.builder()
+                .tokenEndpoint("/api" + "/oauth2/token")
+                .build();
     }
 }

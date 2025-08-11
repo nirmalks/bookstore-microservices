@@ -4,13 +4,9 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 
@@ -25,7 +21,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/users/register").permitAll()
                         .pathMatchers("/api/users/admin/register").permitAll()
                         .pathMatchers("/api/internal/**").permitAll()
-                        .pathMatchers("/api/login").permitAll()
+                        .pathMatchers("/api/login", "/api/oauth2/token").permitAll()
                         .pathMatchers("/eureka/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
                         .pathMatchers("/api/books/**", "/api/genres/**", "/api/authors/**").permitAll()
@@ -74,6 +70,12 @@ public class SecurityConfig {
                         .and().method("GET", "POST", "PUT", "DELETE")
                         .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
                         .uri("lb://checkout-service"))
+
+                // auth server route
+                .route("auth-server-route", r -> r.path("/api/oauth2/token", "/api/oauth/**")
+                        .and().method("GET", "POST", "PUT", "DELETE")
+                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .uri("lb://auth-server"))
                 .build();
     }
 }

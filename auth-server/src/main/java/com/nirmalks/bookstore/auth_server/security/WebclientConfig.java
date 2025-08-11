@@ -18,7 +18,7 @@ public class WebclientConfig {
     @Bean("userServiceClientRegistration")
     public ReactiveClientRegistrationRepository clientRegistrations() {
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("auth-server-client-id")
-                .tokenUri("http://localhost:9000/oauth2/token")
+                .tokenUri("http://localhost:9000/api/oauth2/token")
                 .clientId("auth-server-client")
                 .clientSecret("auth-server-secret")
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
