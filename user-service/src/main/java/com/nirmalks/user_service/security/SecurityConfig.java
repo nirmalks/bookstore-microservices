@@ -21,17 +21,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    @Order(1) // Highest priority for internal API routes
+    @Order(0)
     public SecurityFilterChain internalApiChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/internal/**") // This matcher ensures this filter chain only applies to internal APIs
+                .securityMatcher("/api/internal/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/internal/users/auth").hasAuthority("SCOPE_internal_api")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
-                // Use the oauth2ResourceServer with the custom converter for internal API JWTs
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(new InternalApiJwtConverter()))
                 );
@@ -40,6 +39,7 @@ public class SecurityConfig {
 
 
     @Bean
+    @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher(request -> !request.getRequestURI().startsWith("/api/internal/"))
                 .authorizeHttpRequests(auth -> auth
@@ -52,7 +52,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(new InternalApiJwtConverter())));
         return http.build();
     }
     @Bean

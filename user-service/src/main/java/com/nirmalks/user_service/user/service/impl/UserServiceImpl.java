@@ -108,5 +108,10 @@ public class UserServiceImpl implements UserService {
         address.setUser(user);
         return AddressMapper.toDto(addressRepository.save(address));
     }
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
 }
 

@@ -31,7 +31,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping()
     @Operation(summary = "Get all users", description = "Retrieves a paginated list of all users. Accessible by ADMIN role only.")
     @ApiResponses(value = {

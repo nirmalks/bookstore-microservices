@@ -37,7 +37,8 @@ public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
                             String roles = jwt.getClaimAsString(rolesClaim);
                             System.out.println("roles str" + roles);
                             if (roles != null) {
-                                builder.header("X-User-Roles", roles);
+                                String rolesWithoutBrackets = roles.trim().replace("[", "").replace("]", "");
+                                builder.header("X-User-Roles", rolesWithoutBrackets);
                             }
                         } else {
                             String authorities = authentication.getAuthorities().stream()
