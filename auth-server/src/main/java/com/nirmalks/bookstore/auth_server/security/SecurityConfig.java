@@ -162,6 +162,7 @@ public class SecurityConfig {
                 // Case for internal client authentication (client credentials grant)
                 else if (principal instanceof OAuth2ClientAuthenticationToken) {
                     String clientId = principal.getName();
+                    context.getClaims().claim("client_id", clientId);
                     Set<String> scopes = context.getRegisteredClient().getScopes();
                     System.out.println("JWT custom claims injected for internal client: " + clientId + " with scopes: " + scopes);
                 }

@@ -25,14 +25,14 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         System.out.println("JwtHeaderAuthenticationFilter called for: " + request.getRequestURI());
 
-        String userId = request.getHeader("X-User-ID");
+        Long userId = Long.parseLong(request.getHeader("X-User-ID"));
         System.out.println("user id " + userId);
         String userRolesHeader = request.getHeader("X-User-Roles");
         System.out.println("user roles" + userRolesHeader);
 
         // Check if both user ID and roles headers are present and not empty.
         // If they are, it signifies that the request has been authenticated by the Gateway.
-        if (userId != null && !userId.isEmpty() && userRolesHeader != null && !userRolesHeader.isEmpty()) {
+        if (userRolesHeader != null && !userRolesHeader.isEmpty()) {
             // Parse the roles string (e.g., "ROLE_ADMIN,ROLE_CUSTOMER") into a collection
             // of Spring Security's GrantedAuthority objects.
             Collection<? extends GrantedAuthority> authorities = Arrays.stream(userRolesHeader.split(","))

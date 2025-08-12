@@ -31,10 +31,10 @@ public class CartServiceImpl implements CartService {
     private final WebClient userServiceWebClient;
 
     public CartServiceImpl(
-            @Qualifier("catalogServiceWebClient") WebClient.Builder catalogServiceWebClientBuilder,
-            @Qualifier("userServiceWebClient") WebClient.Builder userServiceWebClientBuilder) {
-        this.catalogServiceWebClient = catalogServiceWebClientBuilder.build();
-        this.userServiceWebClient = userServiceWebClientBuilder.build();
+            @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient,
+            @Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
+        this.catalogServiceWebClient = catalogServiceWebClient;
+        this.userServiceWebClient = userServiceWebClient;
     }
     public CartResponse getCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId)

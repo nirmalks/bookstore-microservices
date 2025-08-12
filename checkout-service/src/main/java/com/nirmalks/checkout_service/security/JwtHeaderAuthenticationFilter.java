@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/internal/");
+        return request.getRequestURI().startsWith("/api/internal/");
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

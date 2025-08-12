@@ -45,13 +45,13 @@ public class OrderServiceImpl implements OrderService {
     private final WebClient userServiceWebClient;
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
-                            CartRepository cartRepository, @Qualifier("catalogServiceWebClient") WebClient.Builder catalogServiceWebClientBuilder,
-                            @Qualifier("userServiceWebClient") WebClient.Builder userServiceWebClientBuilder) {
+                            CartRepository cartRepository, @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient,
+                            @Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.cartRepository = cartRepository;
-        this.catalogServiceWebClient = catalogServiceWebClientBuilder.build();
-        this.userServiceWebClient = userServiceWebClientBuilder.build();
+        this.catalogServiceWebClient = catalogServiceWebClient;
+        this.userServiceWebClient = userServiceWebClient;
     }
 
     @Override
