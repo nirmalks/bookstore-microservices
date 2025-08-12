@@ -44,7 +44,7 @@ public class SecurityConfig {
         http.securityMatcher(request -> !request.getRequestURI().startsWith("/api/internal/"))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/register", "/api/login", "/actuator/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
