@@ -144,9 +144,7 @@ public class SecurityConfig {
                     CustomUserDetails userDetails = (CustomUserDetails) principal.getPrincipal();
 
                     Long userId = userDetails.getId();
-                    System.out.println("uid" + userId);
                     String username = userDetails.getUsername();
-                    System.out.println("usernma" + username);
                     if (userId != null && username != null) {
                         context.getClaims().subject(userId.toString());
                         context.getClaims().claim("username", username);

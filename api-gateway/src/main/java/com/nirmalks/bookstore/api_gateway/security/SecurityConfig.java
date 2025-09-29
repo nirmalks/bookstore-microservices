@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
-
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
@@ -23,6 +22,7 @@ public class SecurityConfig {
                         .pathMatchers("/api/internal/**").permitAll()
                         .pathMatchers("/api/login", "/api/oauth2/token").permitAll()
                         .pathMatchers("/eureka/**").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
                         .pathMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
                         .pathMatchers("/api/books/**", "/api/genres/**", "/api/authors/**").permitAll()
                         .anyExchange().authenticated()
@@ -46,35 +46,47 @@ public class SecurityConfig {
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 // --- User Service Login/Register Route ---
-                // Separate route for login and registration to ensure clear path matching
                 .route("user-auth-route", r -> r.path("/api/login", "/api/register/**")
                         .and().method("GET", "POST", "PUT", "DELETE")
-                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}")
+                                .circuitBreaker(c -> c.setName("userAuthCB")
+                                        .setFallbackUri("forward:/fallback/userauth")))
                         .uri("lb://user-service"))
 
                 // --- User Service General API Route ---
-                // Separate route for general user operations
                 .route("user-api-route", r -> r.path("/api/users/**", "/api/internal/**")
                         .and().method("GET", "POST", "PUT", "DELETE")
-                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}")
+                                .circuitBreaker(c -> c.setName("userApiCB")
+                                        .setFallbackUri("forward:/fallback/user")
+                        ))
                         .uri("lb://user-service"))
 
                 // --- Catalog Service Route ---
                 .route("catalog-service-route", r -> r.path("/api/books/**", "/api/authors/**", "/api/genres/**")
                         .and().method("GET", "POST", "PUT", "DELETE")
-                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .filters(f -> f
+                                .rewritePath("/api/(?<segment>.*)", "/api/${segment}")
+                                .circuitBreaker(c -> c.setName("catalogCB")
+                                        .setFallbackUri("forward:/fallback/catalog"))
+                        )
                         .uri("lb://catalog-service"))
 
                 // --- Checkout Service Route ---
                 .route("checkout-service-route", r -> r.path("/api/carts/**", "/api/orders/**")
                         .and().method("GET", "POST", "PUT", "DELETE")
-                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}")
+                                .circuitBreaker(c -> c.setName("checkoutCB")
+                                        .setFallbackUri("forward:/fallback/checkout"))
+                        )
                         .uri("lb://checkout-service"))
 
                 // auth server route
                 .route("auth-server-route", r -> r.path("/api/oauth2/token", "/api/oauth/**")
                         .and().method("GET", "POST", "PUT", "DELETE")
-                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
+                        .filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}")
+                                .circuitBreaker(c -> c.setName("authServerCB")
+                                        .setFallbackUri("forward:/fallback/auth")))
                         .uri("lb://auth-server"))
                 .build();
     }

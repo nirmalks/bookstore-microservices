@@ -10,6 +10,7 @@ import com.nirmalks.checkout_service.cart.repository.CartRepository;
 import com.nirmalks.checkout_service.common.BookDto;
 import com.nirmalks.checkout_service.common.UserDto;
 import exceptions.ResourceNotFoundException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,13 +30,10 @@ public class CartServiceImpl implements CartService {
     private CartItemRepository cartItemRepository;
 
     private final WebClient catalogServiceWebClient;
-    private final WebClient userServiceWebClient;
 
     public CartServiceImpl(
-            @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient,
-            @Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
+            @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient) {
         this.catalogServiceWebClient = catalogServiceWebClient;
-        this.userServiceWebClient = userServiceWebClient;
     }
     public CartResponse getCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId)
@@ -42,18 +41,11 @@ public class CartServiceImpl implements CartService {
         return CartMapper.toResponse(cart);
     }
 
-    public Mono<UserDto> getUserDto(Long userId) {
-        return userServiceWebClient.get().uri("/api/users/{id}", userId)
-                .retrieve()
-                .bodyToMono(UserDto.class)
-                .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode().is4xxClientError()) {
-                        return new ResourceNotFoundException("User not found for ID: " + userId);
-                    }
-                    return ex;
-                });
+    public BookDto catalogServiceUnavailableFallback(Long bookId, Throwable ex) {
+        throw new RuntimeException("Catalog service unavailable, cannot add book to cart");
     }
 
+    @CircuitBreaker(name = "catalogServiceCB", fallbackMethod = "catalogServiceUnavailableFallback")
     public Mono<BookDto> getBookDto(Long bookId) {
         return catalogServiceWebClient.get().uri("/api/books/{id}", bookId)
                 .retrieve()
