@@ -15,10 +15,12 @@ import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @Configuration
 public class WebclientConfig {
+    @Value("${auth-server.token-uri}") String tokenUri;
+
     @Bean("userServiceClientRegistration")
     public ReactiveClientRegistrationRepository clientRegistrations() {
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("auth-server-client-id")
-                .tokenUri("http://localhost:9000/api/oauth2/token")
+                .tokenUri(tokenUri)
                 .clientId("auth-server-client")
                 .clientSecret("auth-server-secret")
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
