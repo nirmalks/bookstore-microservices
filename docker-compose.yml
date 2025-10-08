@@ -1,18 +1,162 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  # --- Databases ---
+  user-db:
+    image: postgres:15
+    container_name: user-db
+    environment:
+      POSTGRES_DB: bookstore_user_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bookstore_user_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  catalog-db:
+    image: postgres:15
+    container_name: catalog-db
+    environment:
+      POSTGRES_DB: bookstore_catalog_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5434:5432"
+    volumes:
+      - catalog-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bookstore_catalog_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  checkout-db:
+    image: postgres:15
+    container_name: checkout-db
+    environment:
+      POSTGRES_DB: bookstore_checkout_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5435:5432"
+    volumes:
+      - checkout-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bookstore_checkout_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Microservices ---
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      discovery-service:
+        condition: service_started
+
+  auth-server:
+    build:
+      context: .
+      dockerfile: auth-server/Dockerfile
+    container_name: auth-server
+    ports:
+      - "9001:9001"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      user-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/bookstore_user_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: catalog-service/Dockerfile
+    container_name: catalog-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      catalog-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://catalog-db:5432/bookstore_catalog_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      user-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/bookstore_user_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+
+  checkout-service:
+    build:
+      context: .
+      dockerfile: checkout-service/Dockerfile
+    container_name: checkout-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      discovery-service:
+        condition: service_started
+      checkout-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://checkout-db:5432/bookstore_checkout_service_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin123
+
+  # --- Monitoring ---
   zipkin:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
       - "9411:9411"
+    depends_on:
+      discovery-service:
+        condition: service_started
 
   prometheus:
     image: prom/prometheus
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      -  ./alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - ./alert.rules.yml:/etc/prometheus/alert.rules.yml
     ports:
       - "9090:9090"
 
@@ -25,7 +169,9 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - prometheus
+      prometheus:
+        condition: service_started
+
   alertmanager:
     image: prom/alertmanager
     container_name: alertmanager
@@ -33,3 +179,8 @@ services:
       - "9093:9093"
     volumes:
       - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+
+volumes:
+  user-db-data:
+  catalog-db-data:
+  checkout-db-data:
