@@ -56,7 +56,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse createOrder(DirectOrderRequest directOrderRequest) {
-        var userId = directOrderRequest.getUserId();
         var user = getUserDtoFromUserService(directOrderRequest.getUserId());
 
         var itemDtos = directOrderRequest.getItems();
