@@ -52,7 +52,6 @@ public class OrderMapper {
         return order;
     }
 
-
     public static OrderItem toOrderItemEntity(BookDto book, CartItem cartItem, Order order) {
         var orderItem = new OrderItem();
         orderItem.setBookId(cartItem.getBookId());
