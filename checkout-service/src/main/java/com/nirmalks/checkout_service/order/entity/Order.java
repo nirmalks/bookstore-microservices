@@ -2,12 +2,13 @@ package com.nirmalks.checkout_service.order.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 @Entity
 @Table(name = "purchase_order")
 public class Order {
@@ -20,8 +21,9 @@ public class Order {
 
     private Double totalCost;
 
+    @Column(name = "status", columnDefinition = "order_status_enum")
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private OrderStatus orderStatus;
 
     @Column(name = "placed_date", nullable = false, updatable = false)
