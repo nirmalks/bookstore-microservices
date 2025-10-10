@@ -8,6 +8,7 @@ COPY shared-utils/pom.xml shared-utils/
 COPY discovery-service/pom.xml discovery-service/
 COPY api-gateway/pom.xml api-gateway/
 COPY auth-server/pom.xml auth-server/
+COPY config-server/pom.xml config-server/
 
 COPY shared-utils/src shared-utils/src
 RUN mvn clean install -DskipTests -pl shared-utils -am

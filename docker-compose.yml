@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   # --- Databases ---
   user-db:
@@ -62,6 +60,22 @@ services:
     ports:
       - "8761:8761"
 
+  config-server:
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      discovery-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
   api-gateway:
     build:
       context: .
@@ -72,7 +86,8 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
-
+      config-server:
+        condition: service_started
   auth-server:
     build:
       context: .
@@ -85,6 +100,8 @@ services:
         condition: service_started
       user-db:
         condition: service_healthy
+      config-server:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/bookstore_user_service_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -102,6 +119,8 @@ services:
         condition: service_started
       catalog-db:
         condition: service_healthy
+      config-server:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://catalog-db:5432/bookstore_catalog_service_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -119,6 +138,8 @@ services:
         condition: service_started
       user-db:
         condition: service_healthy
+      config-server:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/bookstore_user_service_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -136,6 +157,8 @@ services:
         condition: service_started
       checkout-db:
         condition: service_healthy
+      config-server:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://checkout-db:5432/bookstore_checkout_service_db
       - SPRING_DATASOURCE_USERNAME=postgres
