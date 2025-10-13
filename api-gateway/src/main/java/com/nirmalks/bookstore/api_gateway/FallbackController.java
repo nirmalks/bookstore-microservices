@@ -1,33 +1,44 @@
 package com.nirmalks.bookstore.api_gateway;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import exceptions.ServiceUnavailableException;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
+@RequestMapping("/fallback")
 public class FallbackController {
-    @GetMapping("/fallback/userauth")
-    public Mono<String> userAuthFallback() {
-        return Mono.just("User Auth Service is unavailable. Please try again later.");
+
+    private Mono<String> handleFallback(ServerHttpRequest request, String message) {
+        if (request.getMethod() == HttpMethod.GET) {
+            return Mono.just(message);
+        }
+        return Mono.error(new ServiceUnavailableException("Service unavailable and no fallback for non-GET methods."));
     }
 
-    @GetMapping("/fallback/user")
-    public Mono<String> userFallback() {
-        return Mono.just("User Service is unavailable. Please try again later.");
+    @RequestMapping("/userauth")
+    public Mono<String> userAuthFallback(ServerHttpRequest request) {
+        return handleFallback(request, "User Auth Service is unavailable. Please try again later.");
     }
 
-    @GetMapping("/fallback/catalog")
-    public Mono<String> catalogFallback() {
-        return Mono.just("Catalog Service is unavailable. Please try again later.");
+    @RequestMapping("/user")
+    public Mono<String> userFallback(ServerHttpRequest request) {
+        return handleFallback(request, "User Service is unavailable. Please try again later.");
     }
 
-    @GetMapping("/fallback/checkout")
-    public Mono<String> checkoutFallback() {
-        return Mono.just("Checkout Service is unavailable. Please try again later.");
+    @RequestMapping("/catalog")
+    public Mono<String> catalogFallback(ServerHttpRequest request) {
+        return handleFallback(request, "Catalog Service is unavailable. Please try again later.");
     }
 
-    @GetMapping("/fallback/auth")
-    public Mono<String> authFallback() {
-        return Mono.just("Auth Server is unavailable. Please try again later.");
+    @RequestMapping("/checkout")
+    public Mono<String> checkoutFallback(ServerHttpRequest request) {
+        return handleFallback(request, "Checkout Service is unavailable. Please try again later.");
+    }
+
+    @RequestMapping("/auth")
+    public Mono<String> authFallback(ServerHttpRequest request) {
+        return handleFallback(request, "Auth Server is unavailable. Please try again later.");
     }
 }
