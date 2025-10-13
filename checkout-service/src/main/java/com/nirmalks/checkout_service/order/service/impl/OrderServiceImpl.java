@@ -18,10 +18,13 @@ import com.nirmalks.checkout_service.order.repository.OrderItemRepository;
 import com.nirmalks.checkout_service.order.repository.OrderRepository;
 import com.nirmalks.checkout_service.order.service.OrderService;
 import common.RequestUtils;
-import dto.AddressDto;
-import dto.AddressRequestWithUserId;
 import dto.PageRequestDto;
 import exceptions.ResourceNotFoundException;
+import exceptions.ServiceUnavailableException;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -29,7 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
+import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +59,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse createOrder(DirectOrderRequest directOrderRequest) {
-        var user = getUserDtoFromUserService(directOrderRequest.getUserId());
+        var user = getUserDtoFromUserService(directOrderRequest.getUserId()).block();
 
         var itemDtos = directOrderRequest.getItems();
         var order = OrderMapper.toOrderEntity(user, directOrderRequest.getAddress());
         var orderItems = itemDtos.stream().map(itemDto -> {
-            var book = getBookDtoFromCatalogService(itemDto.getBookId());
+            var book = getBookDtoFromCatalogService(itemDto.getBookId()).block();
             return OrderMapper.toOrderItemEntity(book, itemDto, order);
         }).toList();
         order.setItems(orderItems);
@@ -75,11 +78,11 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse createOrder(OrderFromCartRequest orderFromCartRequest) {
         Cart cart = cartRepository.findById(orderFromCartRequest.getCartId()).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         List<OrderItem> orderItems = new ArrayList<>();
-        UserDto user = getUserDtoFromUserService(orderFromCartRequest.getUserId());
+        UserDto user = getUserDtoFromUserService(orderFromCartRequest.getUserId()).block();
         Order order = OrderMapper.toOrderEntity(user, orderFromCartRequest.getShippingAddress());
 
         for(CartItem cartItem: cart.getCartItems()) {
-            BookDto book = getBookDtoFromCatalogService(cartItem.getBookId());
+            BookDto book = getBookDtoFromCatalogService(cartItem.getBookId()).block();
 
             var orderItem = OrderMapper.toOrderItemEntity(book, cartItem, order);
             orderItems.add(orderItem);
@@ -100,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     public Page<OrderSummaryDto> getOrdersByUser(Long userId, PageRequestDto pageRequestDto) {
-        var user = getUserDtoFromUserService(userId);
+        var user = getUserDtoFromUserService(userId).block();
         var pageable = RequestUtils.getPageable(pageRequestDto);
         var orders = orderRepository.findAllByUserId(userId, pageable);
         return orders.map(order -> OrderMapper.toOrderSummary(order, user));
@@ -118,33 +121,29 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
-    private UserDto getUserDtoFromUserService(Long userId) {
-        return userServiceWebClient.get().uri("/api/users/{id}", userId)
+    @Retry(name = "userService", fallbackMethod = "getUserDtoFallback")
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUserDtoFallback")
+    @Bulkhead(name = "userService")
+    @RateLimiter(name = "userService", fallbackMethod = "getUserDtoFallback")
+    public Mono<UserDto> getUserDtoFromUserService(Long userId) {
+        return userServiceWebClient.get()
+                .uri("/api/users/{id}", userId)
                 .retrieve()
                 .bodyToMono(UserDto.class)
                 .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    if (ex instanceof WebClientResponseException wcEx &&
+                            wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
                         return new ResourceNotFoundException("User not found for ID: " + userId);
                     }
                     return ex;
-                })
-                .block();
+                });
     }
 
-    private AddressDto updateAddressDtoFromUserService(AddressRequestWithUserId addressRequestWithUserId) {
-        return userServiceWebClient.post().uri("/api/users/address", addressRequestWithUserId)
-                .retrieve()
-                .bodyToMono(AddressDto.class)
-                .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
-                        return new ResourceNotFoundException("User not found for ID: " + addressRequestWithUserId.getUserId());
-                    }
-                    return ex;
-                })
-                .block();
-    }
-
-    private BookDto getBookDtoFromCatalogService(Long bookId) {
+    @Bulkhead(name = "catalogService")
+    @CircuitBreaker(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+    @Retry(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+    @RateLimiter(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+    public Mono<BookDto> getBookDtoFromCatalogService(Long bookId) {
         return catalogServiceWebClient.get().uri("/api/books/{id}", bookId)
                 .retrieve()
                 .bodyToMono(BookDto.class)
@@ -154,7 +153,17 @@ public class OrderServiceImpl implements OrderService {
                     }
                     return ex;
                 })
-                .block();
+        .onErrorResume(throwable -> getBookDtoFallback(bookId, throwable));
+    }
+
+    private UserDto getUserDtoFallback(Long userId, Throwable t) {
+        System.err.println("User Service call failed after retries/bulkhead limit. Error: " + t.getMessage());
+        throw new ServiceUnavailableException("Cannot retrieve User details. System is currently unavailable.");
+    }
+
+    private Mono<BookDto> getBookDtoFallback(Long bookId, Throwable t) {
+        System.err.println("Catalog Service call failed due to rate limit/bulkhead. Error: " + t.getMessage());
+        throw new ServiceUnavailableException("Cannot verify Book details. System is currently unavailable.");
     }
 
 }
