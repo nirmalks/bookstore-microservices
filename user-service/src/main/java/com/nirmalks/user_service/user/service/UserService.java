@@ -11,13 +11,23 @@ import org.springframework.stereotype.Service;
 
 @Service
 public interface UserService {
-    Page<UserResponse> getUsers(PageRequestDto pageRequestDto);
-    UserResponse createUser(CreateUserRequest userRequest, UserRole userRole);
-    UserResponse getUserById(Long id);
-    UserResponse updateUser(Long id, UpdateUserRequest userRequest);
-    void deleteUser(Long userId);
-    LoginResponse authenticate(String username, String password);
-    AddressDto updateAddress(AddressRequestWithUserId addressRequest);
-    UserDto internalAuthenticate(String username, String password);
-    User findByUsername(String username);
+
+	Page<UserResponse> getUsers(PageRequestDto pageRequestDto);
+
+	UserResponse createUser(CreateUserRequest userRequest, UserRole userRole);
+
+	UserResponse getUserById(Long id);
+
+	UserResponse updateUser(Long id, UpdateUserRequest userRequest);
+
+	void deleteUser(Long userId);
+
+	LoginResponse authenticate(String username, String password);
+
+	AddressDto updateAddress(AddressRequestWithUserId addressRequest);
+
+	UserDto internalAuthenticate(String username, String password);
+
+	User findByUsername(String username);
+
 }

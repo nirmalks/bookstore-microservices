@@ -10,63 +10,65 @@ import java.util.Collections;
 
 @Entity(name = "users")
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(nullable = false)
-    private String username;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false)
-    private String password;
+	@Column(nullable = false)
+	private String username;
 
-    @Column(name = "role", nullable = false, columnDefinition = "user_role_enum")
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+	@Column(nullable = false)
+	private String password;
 
-    private String email;
+	@Column(name = "role", nullable = false, columnDefinition = "user_role_enum")
+	@Enumerated(EnumType.STRING)
+	private UserRole role;
 
-    public Long getId() {
-        return id;
-    }
+	private String email;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public UserRole getRole() {
-        return role;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+	public UserRole getRole() {
+		return role;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setRole(UserRole role) {
+		this.role = role;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public Collection<?extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.getRole().name()));
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + this.getRole().name()));
+	}
+
 }

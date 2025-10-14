@@ -6,45 +6,46 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UpdateUserRequest {
-    @NotNull(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
-    private String password;
 
-    private UserRole role;
+	@NotNull(message = "Password is required")
+	@Size(min = 6, message = "Password must be at least 6 characters long")
+	private String password;
 
-    @Email(message = "Invalid email address")
-    private String email;
+	private UserRole role;
 
-    public @NotNull(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters long") String getPassword() {
-        return password;
-    }
+	@Email(message = "Invalid email address")
+	private String email;
 
-    public void setPassword(@NotNull(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters long") String password) {
-        this.password = password;
-    }
+	public @NotNull(message = "Password is required") @Size(min = 6,
+			message = "Password must be at least 6 characters long") String getPassword() {
+		return password;
+	}
 
-    public UserRole getRole() {
-        return role;
-    }
+	public void setPassword(@NotNull(message = "Password is required") @Size(min = 6,
+			message = "Password must be at least 6 characters long") String password) {
+		this.password = password;
+	}
 
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
+	public UserRole getRole() {
+		return role;
+	}
 
-    public @Email(message = "Invalid email address") String getEmail() {
-        return email;
-    }
+	public void setRole(UserRole role) {
+		this.role = role;
+	}
 
-    public void setEmail(@Email(message = "Invalid email address") String email) {
-        this.email = email;
-    }
+	public @Email(message = "Invalid email address") String getEmail() {
+		return email;
+	}
 
-    @Override
-    public String toString() {
-        return "UpdateUserRequest{" +
-                "password='" + password + '\'' +
-                ", role=" + role +
-                ", email='" + email + '\'' +
-                '}';
-    }
+	public void setEmail(@Email(message = "Invalid email address") String email) {
+		this.email = email;
+	}
+
+	@Override
+	public String toString() {
+		return "UpdateUserRequest{" + "password='" + password + '\'' + ", role=" + role + ", email='" + email + '\''
+				+ '}';
+	}
+
 }

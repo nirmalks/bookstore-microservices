@@ -3,50 +3,51 @@ package com.nirmalks.user_service.user.api;
 import dto.UserRole;
 
 public class UserResponse {
-    private Long id;
-    private String username;
-    private String email;
-    private UserRole userRole;
 
-    public UserRole getUserRole() {
-        return userRole;
-    }
+	private Long id;
 
-    public void setUserRole(UserRole userRole) {
-        this.userRole = userRole;
-    }
+	private String username;
 
-    public Long getId() {
-        return id;
-    }
+	private String email;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	private UserRole userRole;
 
-    public String getUsername() {
-        return username;
-    }
+	public UserRole getUserRole() {
+		return userRole;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public void setUserRole(UserRole userRole) {
+		this.userRole = userRole;
+	}
 
-    @Override
-    public String toString() {
-        return "UserResponse{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", userRole=" + userRole +
-                '}';
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	@Override
+	public String toString() {
+		return "UserResponse{" + "id=" + id + ", username='" + username + '\'' + ", email='" + email + '\''
+				+ ", userRole=" + userRole + '}';
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 }

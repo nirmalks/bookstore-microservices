@@ -9,96 +9,107 @@ import java.util.Objects;
 
 @Entity
 public class Address {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
 
-    String city;
-    String state;
-    String country;
-    String pinCode;
-    boolean isDefault;
-    String address;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
-    User user;
+	String city;
 
-    public User getUser() {
-        return user;
-    }
+	String state;
 
-    public void setUser(User user) {
-        this.user = user;
-    }
+	String country;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Address address1 = (Address) o;
-        return isDefault == address1.isDefault && Objects.equals(id, address1.id) && Objects.equals(city, address1.city) && Objects.equals(state, address1.state) && Objects.equals(country, address1.country) && Objects.equals(pinCode, address1.pinCode) && Objects.equals(address, address1.address);
-    }
+	String pinCode;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, city, state, country, pinCode, isDefault, address);
-    }
+	boolean isDefault;
 
-    public Long getId() {
-        return id;
-    }
+	String address;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	@JsonBackReference
+	User user;
 
-    public String getCity() {
-        return city;
-    }
+	public User getUser() {
+		return user;
+	}
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	public void setUser(User user) {
+		this.user = user;
+	}
 
-    public String getState() {
-        return state;
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Address address1 = (Address) o;
+		return isDefault == address1.isDefault && Objects.equals(id, address1.id) && Objects.equals(city, address1.city)
+				&& Objects.equals(state, address1.state) && Objects.equals(country, address1.country)
+				&& Objects.equals(pinCode, address1.pinCode) && Objects.equals(address, address1.address);
+	}
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, city, state, country, pinCode, isDefault, address);
+	}
 
-    public String getCountry() {
-        return country;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getPinCode() {
-        return pinCode;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public boolean isDefault() {
-        return isDefault;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public String getAddress() {
-        return address;
-    }
+	public String getCountry() {
+		return country;
+	}
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getPinCode() {
+		return pinCode;
+	}
+
+	public void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
+	}
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean aDefault) {
+		isDefault = aDefault;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
 }

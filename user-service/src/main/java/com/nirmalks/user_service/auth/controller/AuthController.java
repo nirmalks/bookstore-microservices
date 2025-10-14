@@ -21,26 +21,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api")
-@Tag(name = "Authentication", description = "User login and authentication operations") // Added Tag
+@Tag(name = "Authentication", description = "User login and authentication operations") // Added
+																						// Tag
 public class AuthController {
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @PostMapping("/login")
-    @Operation(summary = "User login", description = "Authenticates a user and returns a JWT token upon successful login.") // Added Operation
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Login successful, returns JWT token"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials")
-    })
-    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-        if (authentication.isAuthenticated()) {
-            LoginResponse loginResponse = userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
-            return ResponseEntity.ok(loginResponse);
-        }
-        throw new BadCredentialsException("Invalid credentials");
-    }
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+
+	@PostMapping("/login")
+	@Operation(summary = "User login",
+			description = "Authenticates a user and returns a JWT token upon successful login.") // Added
+																									// Operation
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Login successful, returns JWT token"),
+			@ApiResponse(responseCode = "401", description = "Invalid credentials") })
+	public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+		Authentication authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		if (authentication.isAuthenticated()) {
+			LoginResponse loginResponse = userService.authenticate(loginRequest.getUsername(),
+					loginRequest.getPassword());
+			return ResponseEntity.ok(loginResponse);
+		}
+		throw new BadCredentialsException("Invalid credentials");
+	}
+
 }
