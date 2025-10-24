@@ -8,60 +8,64 @@ import java.util.Objects;
 
 @Entity
 public class Author {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(columnDefinition = "TEXT")
-    private String bio;
+	private String name;
 
-    @ManyToMany(mappedBy = "authors")
-    private List<Book> books;
+	@Column(columnDefinition = "TEXT")
+	private String bio;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Author author = (Author) o;
-        return Objects.equals(id, author.id);
-    }
+	@ManyToMany(mappedBy = "authors")
+	private List<Book> books;
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Author author = (Author) o;
+		return Objects.equals(id, author.id);
+	}
 
-    public Long getId() {
-        return id;
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getBio() {
-        return bio;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
+	public String getBio() {
+		return bio;
+	}
 
-    public List<Book> getBooks() {
-        return books;
-    }
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
 
-    public void setBooks(List<Book> books) {
-        this.books = books;
-    }
+	public List<Book> getBooks() {
+		return books;
+	}
+
+	public void setBooks(List<Book> books) {
+		this.books = books;
+	}
+
 }

@@ -1,31 +1,35 @@
 package com.nirmalks.checkout_service.order.api;
 
 public class OrderItemRequest {
-    private Long bookId;
-    private int quantity;
-    private double price;
 
-    public Long getBookId() {
-        return bookId;
-    }
+	private Long bookId;
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	private int quantity;
 
-    public int getQuantity() {
-        return quantity;
-    }
+	private double price;
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public Long getBookId() {
+		return bookId;
+	}
 
-    public double getPrice() {
-        return price;
-    }
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
 }

@@ -1,4 +1,5 @@
 package com.nirmalks.checkout_service.security;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -19,32 +20,40 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers( "/actuator/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/books/**" ,"/api/books", "/api/genres").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .addFilterBefore(jwtHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-    @Bean
-    @Order(1)
-    public JwtHeaderAuthenticationFilter jwtHeaderAuthenticationFilter() {
-        return new JwtHeaderAuthenticationFilter();
-    }
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/**")
+			.permitAll()
+			.requestMatchers(HttpMethod.GET, "/api/books/**", "/api/books", "/api/genres")
+			.permitAll()
+			.requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/error")
+			.permitAll()
+			.anyRequest()
+			.authenticated())
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.csrf(AbstractHttpConfigurer::disable)
+			.httpBasic(AbstractHttpConfigurer::disable)
+			.formLogin(AbstractHttpConfigurer::disable)
+			.addFilterBefore(jwtHeaderAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		return http.build();
+	}
+
+	@Bean
+	@Order(1)
+	public JwtHeaderAuthenticationFilter jwtHeaderAuthenticationFilter() {
+		return new JwtHeaderAuthenticationFilter();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+			throws Exception {
+		return authenticationConfiguration.getAuthenticationManager();
+	}
+
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 }

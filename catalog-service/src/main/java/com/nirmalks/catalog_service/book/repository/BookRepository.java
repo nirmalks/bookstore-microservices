@@ -12,14 +12,15 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
-
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
-    @Query("SELECT b FROM Book b JOIN b.genres g WHERE g.name = :genreName")
-    Page<Book> findAllByGenresName(@Param("genreName") String genreName, Pageable pageable);
 
-    @Query("SELECT b FROM Book b JOIN b.authors a WHERE a.id = :authorId")
-    Page<Book> findAllByAuthorsId(@Param("authorId") Long authorId, Pageable pageable);
+	@Query("SELECT b FROM Book b JOIN b.genres g WHERE g.name = :genreName")
+	Page<Book> findAllByGenresName(@Param("genreName") String genreName, Pageable pageable);
 
-    Page<Book> findAll(@Nullable Specification<Book> specification, @NonNull Pageable pageable);
+	@Query("SELECT b FROM Book b JOIN b.authors a WHERE a.id = :authorId")
+	Page<Book> findAllByAuthorsId(@Param("authorId") Long authorId, Pageable pageable);
+
+	Page<Book> findAll(@Nullable Specification<Book> specification, @NonNull Pageable pageable);
+
 }

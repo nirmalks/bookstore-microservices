@@ -5,42 +5,39 @@ import com.nirmalks.checkout_service.order.dto.OrderSummaryDto;
 
 public class OrderResponse {
 
-    private String message;
-    private OrderSummaryDto order;
+	private String message;
 
-    public UserDto getUser() {
-        return user;
-    }
+	private OrderSummaryDto order;
 
-    public void setUser(UserDto user) {
-        this.user = user;
-    }
+	public UserDto getUser() {
+		return user;
+	}
 
-    private UserDto user;
+	public void setUser(UserDto user) {
+		this.user = user;
+	}
 
-    public String getMessage() {
-        return message;
-    }
+	private UserDto user;
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public OrderSummaryDto getOrder() {
-        return order;
-    }
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
-    public void setOrder(OrderSummaryDto order) {
-        this.order = order;
-    }
+	public OrderSummaryDto getOrder() {
+		return order;
+	}
 
+	public void setOrder(OrderSummaryDto order) {
+		this.order = order;
+	}
 
-    @Override
-    public String toString() {
-        return "OrderResponseDto{" +
-                "message='" + message + '\'' +
-                ", order=" + order +
-                ", user=" + user +
-                '}';
-    }
+	@Override
+	public String toString() {
+		return "OrderResponseDto{" + "message='" + message + '\'' + ", order=" + order + ", user=" + user + '}';
+	}
+
 }

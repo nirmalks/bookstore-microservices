@@ -4,70 +4,71 @@ import jakarta.persistence.*;
 
 @Entity
 public class CartItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private int quantity;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private double price;
+	private int quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "cart_id", nullable = false)
-    private Cart cart;
+	private double price;
 
-    @Column(name = "book_id", nullable = false)
-    private Long bookId;
+	@ManyToOne
+	@JoinColumn(name = "cart_id", nullable = false)
+	private Cart cart;
 
-    @Column(name = "book_title", nullable = false)
-    private String bookTitle;
+	@Column(name = "book_id", nullable = false)
+	private Long bookId;
 
-    public String getBookTitle() {
-        return bookTitle;
-    }
+	@Column(name = "book_title", nullable = false)
+	private String bookTitle;
 
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
-    }
+	public String getBookTitle() {
+		return bookTitle;
+	}
 
-    public Long getBookId() {
-        return bookId;
-    }
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
+	}
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	public Long getBookId() {
+		return bookId;
+	}
 
-    public Cart getCart() {
-        return cart;
-    }
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
+	public Cart getCart() {
+		return cart;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setCart(Cart cart) {
+		this.cart = cart;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public int getQuantity() {
-        return quantity;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public int getQuantity() {
+		return quantity;
+	}
 
-    public double getPrice() {
-        return price;
-    }
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
 
 }

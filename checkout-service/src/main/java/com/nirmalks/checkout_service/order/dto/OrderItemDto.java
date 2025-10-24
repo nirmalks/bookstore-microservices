@@ -1,69 +1,71 @@
 package com.nirmalks.checkout_service.order.dto;
 
 public class OrderItemDto {
-    private Long id;
-    private Long orderId;
-    private Long bookId;
-    private int quantity;
-    private double price;
-    private String name;
 
-    public String getName() {
-        return name;
-    }
+	private Long id;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	private Long orderId;
 
-    public Long getId() {
-        return id;
-    }
+	private Long bookId;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	private int quantity;
 
-    public Long getOrderId() {
-        return orderId;
-    }
+	private double price;
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
-    }
+	private String name;
 
-    public Long getBookId() {
-        return bookId;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public int getQuantity() {
-        return quantity;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public double getPrice() {
-        return price;
-    }
+	public Long getOrderId() {
+		return orderId;
+	}
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
 
-    @Override
-    public String toString() {
-        return "OrderItemDto{" +
-                "id=" + id +
-                ", orderId=" + orderId +
-                ", bookId=" + bookId +
-                ", quantity=" + quantity +
-                ", price=" + price +
-                '}';
-    }
+	public Long getBookId() {
+		return bookId;
+	}
+
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
+
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderItemDto{" + "id=" + id + ", orderId=" + orderId + ", bookId=" + bookId + ", quantity=" + quantity
+				+ ", price=" + price + '}';
+	}
+
 }

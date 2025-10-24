@@ -1,17 +1,17 @@
 package com.nirmalks.checkout_service.order.entity;
 
 public enum OrderStatus {
-    PENDING("Pending"),
-    SHIPPED("Shipped"),
-    CANCELLED("Cancelled");
 
-    private final String status;
+	PENDING("Pending"), SHIPPED("Shipped"), CANCELLED("Cancelled");
 
-    OrderStatus(String status) {
-        this.status = status;
-    }
+	private final String status;
 
-    public String getStatus() {
-        return status;
-    }
+	OrderStatus(String status) {
+		this.status = status;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
 }

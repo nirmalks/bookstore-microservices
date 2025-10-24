@@ -1,58 +1,57 @@
 package com.nirmalks.checkout_service.cart.dto;
 
-
 public class CartItemDto {
-    private Long id;
-    private Long bookId;
-    private int quantity;
-    private double price;
 
-    public Long getId() {
-        return id;
-    }
+	private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	private Long bookId;
 
-    public Long getBookId() {
-        return bookId;
-    }
+	private int quantity;
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	private double price;
 
-    public int getQuantity() {
-        return quantity;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public double getPrice() {
-        return price;
-    }
+	public Long getBookId() {
+		return bookId;
+	}
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
 
-    public CartItemDto(Long id, Long bookId, int quantity, double price) {
-        this.id = id;
-        this.bookId = bookId;
-        this.quantity = quantity;
-        this.price = price;
-    }
+	public int getQuantity() {
+		return quantity;
+	}
 
-    @Override
-    public String toString() {
-        return "CartItemDto{" +
-                "id=" + id +
-                ", bookId=" + bookId +
-                ", quantity=" + quantity +
-                ", price=" + price +
-                '}';
-    }
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public CartItemDto(Long id, Long bookId, int quantity, double price) {
+		this.id = id;
+		this.bookId = bookId;
+		this.quantity = quantity;
+		this.price = price;
+	}
+
+	@Override
+	public String toString() {
+		return "CartItemDto{" + "id=" + id + ", bookId=" + bookId + ", quantity=" + quantity + ", price=" + price + '}';
+	}
+
 }

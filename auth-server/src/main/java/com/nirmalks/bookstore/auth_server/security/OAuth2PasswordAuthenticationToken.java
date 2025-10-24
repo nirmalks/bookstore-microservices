@@ -9,27 +9,30 @@ import java.util.Map;
 
 public class OAuth2PasswordAuthenticationToken extends OAuth2AuthorizationGrantAuthenticationToken {
 
-    private final RegisteredClient registeredClient;
-    private final Authentication clientPrincipal;
-    private final Map<String, Object> additionalParameters;
-    public OAuth2PasswordAuthenticationToken(RegisteredClient registeredClient,
-                                             Authentication clientPrincipal,
-                                             Map<String, Object> additionalParameters) {
-        super(new AuthorizationGrantType("password"), clientPrincipal, additionalParameters);
-        this.registeredClient = registeredClient;
-        this.clientPrincipal = clientPrincipal;
-        this.additionalParameters = additionalParameters;
-    }
+	private final RegisteredClient registeredClient;
 
-    public RegisteredClient getRegisteredClient() {
-        return registeredClient;
-    }
+	private final Authentication clientPrincipal;
 
-    public Authentication getClientPrincipal() {
-        return clientPrincipal;
-    }
+	private final Map<String, Object> additionalParameters;
 
-    public Map<String, Object> getAdditionalParameters() {
-        return additionalParameters;
-    }
+	public OAuth2PasswordAuthenticationToken(RegisteredClient registeredClient, Authentication clientPrincipal,
+			Map<String, Object> additionalParameters) {
+		super(new AuthorizationGrantType("password"), clientPrincipal, additionalParameters);
+		this.registeredClient = registeredClient;
+		this.clientPrincipal = clientPrincipal;
+		this.additionalParameters = additionalParameters;
+	}
+
+	public RegisteredClient getRegisteredClient() {
+		return registeredClient;
+	}
+
+	public Authentication getClientPrincipal() {
+		return clientPrincipal;
+	}
+
+	public Map<String, Object> getAdditionalParameters() {
+		return additionalParameters;
+	}
+
 }

@@ -8,51 +8,53 @@ import java.util.Objects;
 
 @Entity
 public class Genre {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToMany(mappedBy = "genres")
-    private List<Book> books;
+	private String name;
 
-    public List<Book> getBooks() {
-        return books;
-    }
+	@ManyToMany(mappedBy = "genres")
+	private List<Book> books;
 
-    public void setBooks(List<Book> books) {
-        this.books = books;
-    }
+	public List<Book> getBooks() {
+		return books;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setBooks(List<Book> books) {
+		this.books = books;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Genre genre = (Genre) o;
+		return Objects.equals(id, genre.id);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Genre genre = (Genre) o;
-        return Objects.equals(id, genre.id);
-    }
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
 }

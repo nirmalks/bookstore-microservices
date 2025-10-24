@@ -10,31 +10,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PasswordAuthenticationConverter implements AuthenticationConverter {
-    private final RegisteredClientRepository registeredClientRepository;
 
-    public PasswordAuthenticationConverter(RegisteredClientRepository registeredClientRepository) {
-        this.registeredClientRepository = registeredClientRepository;
-    }
+	private final RegisteredClientRepository registeredClientRepository;
 
-    @Override
-    public Authentication convert(HttpServletRequest request) {
-        if (!"password".equals(request.getParameter("grant_type"))) {
-            return null;
-        }
-        Authentication clientPrincipal = (Authentication) request.getUserPrincipal();
+	public PasswordAuthenticationConverter(RegisteredClientRepository registeredClientRepository) {
+		this.registeredClientRepository = registeredClientRepository;
+	}
 
-        String clientId = clientPrincipal.getName();
+	@Override
+	public Authentication convert(HttpServletRequest request) {
+		if (!"password".equals(request.getParameter("grant_type"))) {
+			return null;
+		}
+		Authentication clientPrincipal = (Authentication) request.getUserPrincipal();
 
-        RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
+		String clientId = clientPrincipal.getName();
 
-        Map<String, Object> additionalParameters = new HashMap<>();
-        additionalParameters.put("username", request.getParameter("username"));
-        additionalParameters.put("password", request.getParameter("password"));
+		RegisteredClient registeredClient = registeredClientRepository.findByClientId(clientId);
 
-        return new OAuth2PasswordAuthenticationToken(
-                registeredClient,
-                clientPrincipal,
-                additionalParameters
-        );
-    }
+		Map<String, Object> additionalParameters = new HashMap<>();
+		additionalParameters.put("username", request.getParameter("username"));
+		additionalParameters.put("password", request.getParameter("password"));
+
+		return new OAuth2PasswordAuthenticationToken(registeredClient, clientPrincipal, additionalParameters);
+	}
+
 }

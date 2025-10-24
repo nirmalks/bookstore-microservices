@@ -23,73 +23,76 @@ import java.util.List;
 
 @Service
 public class CartServiceImpl implements CartService {
-    @Autowired
-    private CartRepository cartRepository;
 
-    @Autowired
-    private CartItemRepository cartItemRepository;
+	@Autowired
+	private CartRepository cartRepository;
 
-    private final WebClient catalogServiceWebClient;
+	@Autowired
+	private CartItemRepository cartItemRepository;
 
-    public CartServiceImpl(
-            @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient) {
-        this.catalogServiceWebClient = catalogServiceWebClient;
-    }
-    public CartResponse getCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user"));
-        return CartMapper.toResponse(cart);
-    }
+	private final WebClient catalogServiceWebClient;
 
-    public BookDto catalogServiceUnavailableFallback(Long bookId, Throwable ex) {
-        throw new RuntimeException("Catalog service unavailable, cannot add book to cart");
-    }
+	public CartServiceImpl(@Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient) {
+		this.catalogServiceWebClient = catalogServiceWebClient;
+	}
 
-    @CircuitBreaker(name = "catalogServiceCB", fallbackMethod = "catalogServiceUnavailableFallback")
-    public Mono<BookDto> getBookDto(Long bookId) {
-        return catalogServiceWebClient.get().uri("/api/books/{id}", bookId)
-                .retrieve()
-                .bodyToMono(BookDto.class)
-                .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode().is4xxClientError()) {
-                        return new ResourceNotFoundException("Book not found for ID: " + bookId);
-                    }
-                    return ex;
-                });
-    }
-    public CartResponse addToCart(Long userId, CartItemRequest cartItemRequest) {
-        BookDto book = getBookDto(cartItemRequest.getBookId()).block();
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseGet(() -> createCartForUser(userId));
+	public CartResponse getCart(Long userId) {
+		Cart cart = cartRepository.findByUserId(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("Cart not found for user"));
+		return CartMapper.toResponse(cart);
+	}
 
-        Cart updatedCart = cartRepository.save(CartMapper.toEntity(book,cart,cartItemRequest));
-        return CartMapper.toResponse(updatedCart);
-    }
+	public BookDto catalogServiceUnavailableFallback(Long bookId, Throwable ex) {
+		throw new RuntimeException("Catalog service unavailable, cannot add book to cart");
+	}
 
-    public void clearCart(Long userId) {
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user"));
-        cart.getCartItems().clear();
-        cartRepository.save(cart);
-    }
+	@CircuitBreaker(name = "catalogServiceCB", fallbackMethod = "catalogServiceUnavailableFallback")
+	public Mono<BookDto> getBookDto(Long bookId) {
+		return catalogServiceWebClient.get()
+			.uri("/api/books/{id}", bookId)
+			.retrieve()
+			.bodyToMono(BookDto.class)
+			.onErrorMap(ex -> {
+				if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode().is4xxClientError()) {
+					return new ResourceNotFoundException("Book not found for ID: " + bookId);
+				}
+				return ex;
+			});
+	}
 
-    private Cart createCartForUser(Long userId) {
-        Cart cart = new Cart();
-        cart.setUserId(userId);
-        return cartRepository.save(cart);
-    }
+	public CartResponse addToCart(Long userId, CartItemRequest cartItemRequest) {
+		BookDto book = getBookDto(cartItemRequest.getBookId()).block();
+		Cart cart = cartRepository.findByUserId(userId).orElseGet(() -> createCartForUser(userId));
 
-    public void removeItemFromCart(Long cartId, Long itemId) {
-        Cart cart = cartRepository.findById(cartId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+		Cart updatedCart = cartRepository.save(CartMapper.toEntity(book, cart, cartItemRequest));
+		return CartMapper.toResponse(updatedCart);
+	}
 
-        List<CartItem> updatedItems = cart.getCartItems().stream()
-                .filter(item -> !item.getId().equals(itemId))
-                .toList();
+	public void clearCart(Long userId) {
+		Cart cart = cartRepository.findByUserId(userId)
+			.orElseThrow(() -> new ResourceNotFoundException("Cart not found for user"));
+		cart.getCartItems().clear();
+		cartRepository.save(cart);
+	}
 
-        cart.setCartItems(updatedItems);
-        cart.setTotalPrice(updatedItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum());
+	private Cart createCartForUser(Long userId) {
+		Cart cart = new Cart();
+		cart.setUserId(userId);
+		return cartRepository.save(cart);
+	}
 
-        cartRepository.save(cart);
-    }
+	public void removeItemFromCart(Long cartId, Long itemId) {
+		Cart cart = cartRepository.findById(cartId).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+
+		List<CartItem> updatedItems = cart.getCartItems()
+			.stream()
+			.filter(item -> !item.getId().equals(itemId))
+			.toList();
+
+		cart.setCartItems(updatedItems);
+		cart.setTotalPrice(updatedItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum());
+
+		cartRepository.save(cart);
+	}
+
 }

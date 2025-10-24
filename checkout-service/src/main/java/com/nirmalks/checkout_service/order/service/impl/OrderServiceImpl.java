@@ -1,6 +1,5 @@
 package com.nirmalks.checkout_service.order.service.impl;
 
-
 import com.nirmalks.checkout_service.cart.entity.Cart;
 import com.nirmalks.checkout_service.cart.entity.CartItem;
 import com.nirmalks.checkout_service.cart.repository.CartRepository;
@@ -40,130 +39,135 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private OrderRepository orderRepository;
+	private OrderRepository orderRepository;
 
-    private OrderItemRepository orderItemRepository;
-    private final CartRepository cartRepository;
-    private final WebClient catalogServiceWebClient;
-    private final WebClient userServiceWebClient;
-    @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
-                            CartRepository cartRepository, @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient,
-                            @Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
-        this.cartRepository = cartRepository;
-        this.catalogServiceWebClient = catalogServiceWebClient;
-        this.userServiceWebClient = userServiceWebClient;
-    }
+	private OrderItemRepository orderItemRepository;
 
-    @Override
-    public OrderResponse createOrder(DirectOrderRequest directOrderRequest) {
-        var user = getUserDtoFromUserService(directOrderRequest.getUserId()).block();
+	private final CartRepository cartRepository;
 
-        var itemDtos = directOrderRequest.getItems();
-        var order = OrderMapper.toOrderEntity(user, directOrderRequest.getAddress());
-        var orderItems = itemDtos.stream().map(itemDto -> {
-            var book = getBookDtoFromCatalogService(itemDto.getBookId()).block();
-            return OrderMapper.toOrderItemEntity(book, itemDto, order);
-        }).toList();
-        order.setItems(orderItems);
-        order.setTotalCost(order.calculateTotalCost());
-        var savedOrder = orderRepository.save(order);
-        orderItemRepository.saveAll(orderItems);
-        return OrderMapper.toResponse(user, savedOrder,"Order placed successfully.");
-    }
+	private final WebClient catalogServiceWebClient;
 
-    @Override
-    public OrderResponse createOrder(OrderFromCartRequest orderFromCartRequest) {
-        Cart cart = cartRepository.findById(orderFromCartRequest.getCartId()).orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
-        List<OrderItem> orderItems = new ArrayList<>();
-        UserDto user = getUserDtoFromUserService(orderFromCartRequest.getUserId()).block();
-        Order order = OrderMapper.toOrderEntity(user, orderFromCartRequest.getShippingAddress());
+	private final WebClient userServiceWebClient;
 
-        for(CartItem cartItem: cart.getCartItems()) {
-            BookDto book = getBookDtoFromCatalogService(cartItem.getBookId()).block();
+	@Autowired
+	public OrderServiceImpl(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
+			CartRepository cartRepository, @Qualifier("catalogServiceWebClient") WebClient catalogServiceWebClient,
+			@Qualifier("userServiceWebClient") WebClient userServiceWebClient) {
+		this.orderRepository = orderRepository;
+		this.orderItemRepository = orderItemRepository;
+		this.cartRepository = cartRepository;
+		this.catalogServiceWebClient = catalogServiceWebClient;
+		this.userServiceWebClient = userServiceWebClient;
+	}
 
-            var orderItem = OrderMapper.toOrderItemEntity(book, cartItem, order);
-            orderItems.add(orderItem);
-        }
+	@Override
+	public OrderResponse createOrder(DirectOrderRequest directOrderRequest) {
+		var user = getUserDtoFromUserService(directOrderRequest.getUserId()).block();
 
-        order.setUserId(orderFromCartRequest.getUserId());
-        order.setItems(orderItems);
-        order.setTotalCost(cart.getTotalPrice());
-        order.setOrderStatus(OrderStatus.PENDING);
-        order.setPlacedDate(LocalDateTime.now());
-        Order savedOrder = orderRepository.save(order);
+		var itemDtos = directOrderRequest.getItems();
+		var order = OrderMapper.toOrderEntity(user, directOrderRequest.getAddress());
+		var orderItems = itemDtos.stream().map(itemDto -> {
+			var book = getBookDtoFromCatalogService(itemDto.getBookId()).block();
+			return OrderMapper.toOrderItemEntity(book, itemDto, order);
+		}).toList();
+		order.setItems(orderItems);
+		order.setTotalCost(order.calculateTotalCost());
+		var savedOrder = orderRepository.save(order);
+		orderItemRepository.saveAll(orderItems);
+		return OrderMapper.toResponse(user, savedOrder, "Order placed successfully.");
+	}
 
-        for (OrderItem item : orderItems) {
-            item.setOrder(savedOrder);
-            orderItemRepository.save(item);
-        }
-        return OrderMapper.toResponse(user, savedOrder, "Order placed successfully.");
-    }
+	@Override
+	public OrderResponse createOrder(OrderFromCartRequest orderFromCartRequest) {
+		Cart cart = cartRepository.findById(orderFromCartRequest.getCartId())
+			.orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
+		List<OrderItem> orderItems = new ArrayList<>();
+		UserDto user = getUserDtoFromUserService(orderFromCartRequest.getUserId()).block();
+		Order order = OrderMapper.toOrderEntity(user, orderFromCartRequest.getShippingAddress());
 
-    public Page<OrderSummaryDto> getOrdersByUser(Long userId, PageRequestDto pageRequestDto) {
-        var user = getUserDtoFromUserService(userId).block();
-        var pageable = RequestUtils.getPageable(pageRequestDto);
-        var orders = orderRepository.findAllByUserId(userId, pageable);
-        return orders.map(order -> OrderMapper.toOrderSummary(order, user));
-    }
+		for (CartItem cartItem : cart.getCartItems()) {
+			BookDto book = getBookDtoFromCatalogService(cartItem.getBookId()).block();
 
-    @Override
-    public Order getOrder(Long orderId) {
-        return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-    }
+			var orderItem = OrderMapper.toOrderItemEntity(book, cartItem, order);
+			orderItems.add(orderItem);
+		}
 
-    public void updateOrderStatus(Long orderId, OrderStatus status) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
-        order.setOrderStatus(status);
-        orderRepository.save(order);
-    }
+		order.setUserId(orderFromCartRequest.getUserId());
+		order.setItems(orderItems);
+		order.setTotalCost(cart.getTotalPrice());
+		order.setOrderStatus(OrderStatus.PENDING);
+		order.setPlacedDate(LocalDateTime.now());
+		Order savedOrder = orderRepository.save(order);
 
-    @Retry(name = "userService", fallbackMethod = "getUserDtoFallback")
-    @CircuitBreaker(name = "userService", fallbackMethod = "getUserDtoFallback")
-    @Bulkhead(name = "userService")
-    @RateLimiter(name = "userService", fallbackMethod = "getUserDtoFallback")
-    public Mono<UserDto> getUserDtoFromUserService(Long userId) {
-        return userServiceWebClient.get()
-                .uri("/api/users/{id}", userId)
-                .retrieve()
-                .bodyToMono(UserDto.class)
-                .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx &&
-                            wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
-                        return new ResourceNotFoundException("User not found for ID: " + userId);
-                    }
-                    return ex;
-                });
-    }
+		for (OrderItem item : orderItems) {
+			item.setOrder(savedOrder);
+			orderItemRepository.save(item);
+		}
+		return OrderMapper.toResponse(user, savedOrder, "Order placed successfully.");
+	}
 
-    @Bulkhead(name = "catalogService")
-    @CircuitBreaker(name = "catalogService", fallbackMethod = "getBookDtoFallback")
-    @Retry(name = "catalogService", fallbackMethod = "getBookDtoFallback")
-    @RateLimiter(name = "catalogService", fallbackMethod = "getBookDtoFallback")
-    public Mono<BookDto> getBookDtoFromCatalogService(Long bookId) {
-        return catalogServiceWebClient.get().uri("/api/books/{id}", bookId)
-                .retrieve()
-                .bodyToMono(BookDto.class)
-                .onErrorMap(ex -> {
-                    if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
-                        return new ResourceNotFoundException("Book not found for ID: " + bookId);
-                    }
-                    return ex;
-                })
-        .onErrorResume(throwable -> getBookDtoFallback(bookId, throwable));
-    }
+	public Page<OrderSummaryDto> getOrdersByUser(Long userId, PageRequestDto pageRequestDto) {
+		var user = getUserDtoFromUserService(userId).block();
+		var pageable = RequestUtils.getPageable(pageRequestDto);
+		var orders = orderRepository.findAllByUserId(userId, pageable);
+		return orders.map(order -> OrderMapper.toOrderSummary(order, user));
+	}
 
-    private UserDto getUserDtoFallback(Long userId, Throwable t) {
-        System.err.println("User Service call failed after retries/bulkhead limit. Error: " + t.getMessage());
-        throw new ServiceUnavailableException("Cannot retrieve User details. System is currently unavailable.");
-    }
+	@Override
+	public Order getOrder(Long orderId) {
+		return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+	}
 
-    private Mono<BookDto> getBookDtoFallback(Long bookId, Throwable t) {
-        System.err.println("Catalog Service call failed due to rate limit/bulkhead. Error: " + t.getMessage());
-        throw new ServiceUnavailableException("Cannot verify Book details. System is currently unavailable.");
-    }
+	public void updateOrderStatus(Long orderId, OrderStatus status) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new IllegalArgumentException("Order not found"));
+		order.setOrderStatus(status);
+		orderRepository.save(order);
+	}
+
+	@Retry(name = "userService", fallbackMethod = "getUserDtoFallback")
+	@CircuitBreaker(name = "userService", fallbackMethod = "getUserDtoFallback")
+	@Bulkhead(name = "userService")
+	@RateLimiter(name = "userService", fallbackMethod = "getUserDtoFallback")
+	public Mono<UserDto> getUserDtoFromUserService(Long userId) {
+		return userServiceWebClient.get()
+			.uri("/api/users/{id}", userId)
+			.retrieve()
+			.bodyToMono(UserDto.class)
+			.onErrorMap(ex -> {
+				if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return new ResourceNotFoundException("User not found for ID: " + userId);
+				}
+				return ex;
+			});
+	}
+
+	@Bulkhead(name = "catalogService")
+	@CircuitBreaker(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+	@Retry(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+	@RateLimiter(name = "catalogService", fallbackMethod = "getBookDtoFallback")
+	public Mono<BookDto> getBookDtoFromCatalogService(Long bookId) {
+		return catalogServiceWebClient.get()
+			.uri("/api/books/{id}", bookId)
+			.retrieve()
+			.bodyToMono(BookDto.class)
+			.onErrorMap(ex -> {
+				if (ex instanceof WebClientResponseException wcEx && wcEx.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return new ResourceNotFoundException("Book not found for ID: " + bookId);
+				}
+				return ex;
+			})
+			.onErrorResume(throwable -> getBookDtoFallback(bookId, throwable));
+	}
+
+	private UserDto getUserDtoFallback(Long userId, Throwable t) {
+		System.err.println("User Service call failed after retries/bulkhead limit. Error: " + t.getMessage());
+		throw new ServiceUnavailableException("Cannot retrieve User details. System is currently unavailable.");
+	}
+
+	private Mono<BookDto> getBookDtoFallback(Long bookId, Throwable t) {
+		System.err.println("Catalog Service call failed due to rate limit/bulkhead. Error: " + t.getMessage());
+		throw new ServiceUnavailableException("Cannot verify Book details. System is currently unavailable.");
+	}
 
 }

@@ -11,18 +11,19 @@ import java.util.List;
 
 @Service
 public interface GenreService {
-    GenreDto createGenre(GenreRequest genreRequest);
 
-    GenreDto updateGenre(Long id, GenreRequest genreRequest);
+	GenreDto createGenre(GenreRequest genreRequest);
 
-    GenreDto getGenreById(Long id);
+	GenreDto updateGenre(Long id, GenreRequest genreRequest);
 
-    Page<GenreDto> getAllGenres(PageRequestDto pageRequestDto);
+	GenreDto getGenreById(Long id);
 
-    void deleteGenreById(Long id);
+	Page<GenreDto> getAllGenres(PageRequestDto pageRequestDto);
 
-    List<Genre> getGenresByIds(List<Long> ids);
+	void deleteGenreById(Long id);
 
-    void validateGenreName(String name);
+	List<Genre> getGenresByIds(List<Long> ids);
+
+	void validateGenreName(String name);
+
 }
-

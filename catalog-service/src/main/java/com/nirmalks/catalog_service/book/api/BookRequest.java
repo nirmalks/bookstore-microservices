@@ -6,107 +6,109 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BookRequest {
-    @NotNull
-    private String title;
-    @NotNull
-    private List<Long> authorIds;
-    @NotNull
-    private Double price;
-    @NotNull
-    private int stock;
-    @NotNull
-    private String isbn;
-    @NotNull
-    private LocalDate publishedDate;
-    @NotNull
-    private List<Long> genreIds;
 
-    private String description;
+	@NotNull
+	private String title;
 
-    private String imagePath;
+	@NotNull
+	private List<Long> authorIds;
 
-    public String getDescription() {
-        return description;
-    }
+	@NotNull
+	private Double price;
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	@NotNull
+	private int stock;
 
-    public String getImagePath() {
-        return imagePath;
-    }
+	@NotNull
+	private String isbn;
 
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
-    }
+	@NotNull
+	private LocalDate publishedDate;
 
-    public String getTitle() {
-        return title;
-    }
+	@NotNull
+	private List<Long> genreIds;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+	private String description;
 
-    public List<Long> getAuthorIds() {
-        return authorIds;
-    }
+	private String imagePath;
 
-    public void setAuthorIds(List<Long> authorIds) {
-        this.authorIds = authorIds;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public Double getPrice() {
-        return price;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+	public String getImagePath() {
+		return imagePath;
+	}
 
-    public int getStock() {
-        return stock;
-    }
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
+	}
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
+	public String getTitle() {
+		return title;
+	}
 
-    public String getIsbn() {
-        return isbn;
-    }
+	public void setTitle(String title) {
+		this.title = title;
+	}
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
+	public List<Long> getAuthorIds() {
+		return authorIds;
+	}
 
-    public LocalDate getPublishedDate() {
-        return publishedDate;
-    }
+	public void setAuthorIds(List<Long> authorIds) {
+		this.authorIds = authorIds;
+	}
 
-    public void setPublishedDate(LocalDate publishedDate) {
-        this.publishedDate = publishedDate;
-    }
+	public Double getPrice() {
+		return price;
+	}
 
-    public List<Long> getGenreIds() {
-        return genreIds;
-    }
+	public void setPrice(Double price) {
+		this.price = price;
+	}
 
-    public void setGenreIds(List<Long> genreIds) {
-        this.genreIds = genreIds;
-    }
+	public int getStock() {
+		return stock;
+	}
 
-    @Override
-    public String toString() {
-        return "BookRequest{" +
-                "title='" + title + '\'' +
-                ", authorIds=" + authorIds +
-                ", price=" + price +
-                ", stock=" + stock +
-                ", isbn='" + isbn + '\'' +
-                ", publishedDate=" + publishedDate +
-                ", genreIds=" + genreIds +
-                '}';
-    }
+	public void setStock(int stock) {
+		this.stock = stock;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
+	}
+
+	public LocalDate getPublishedDate() {
+		return publishedDate;
+	}
+
+	public void setPublishedDate(LocalDate publishedDate) {
+		this.publishedDate = publishedDate;
+	}
+
+	public List<Long> getGenreIds() {
+		return genreIds;
+	}
+
+	public void setGenreIds(List<Long> genreIds) {
+		this.genreIds = genreIds;
+	}
+
+	@Override
+	public String toString() {
+		return "BookRequest{" + "title='" + title + '\'' + ", authorIds=" + authorIds + ", price=" + price + ", stock="
+				+ stock + ", isbn='" + isbn + '\'' + ", publishedDate=" + publishedDate + ", genreIds=" + genreIds
+				+ '}';
+	}
+
 }

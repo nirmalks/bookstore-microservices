@@ -6,51 +6,53 @@ import java.util.List;
 
 @Entity
 public class Cart {
-    @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long id;
 
-    private double totalPrice;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "user_id", nullable = false, unique = true)
-    private Long userId;
+	private double totalPrice;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems;
+	@Column(name = "user_id", nullable = false, unique = true)
+	private Long userId;
 
-    public Long getUserId() {
-        return userId;
-    }
+	@OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<CartItem> cartItems;
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public double getTotalPrice() {
-        return totalPrice;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setTotalPrice(double totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+	public double getTotalPrice() {
+		return totalPrice;
+	}
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
-    }
+	public void setTotalPrice(double totalPrice) {
+		this.totalPrice = totalPrice;
+	}
 
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
-    }
+	public List<CartItem> getCartItems() {
+		return cartItems;
+	}
 
-    public double calculateTotalPrice() {
-        return this.getCartItems().stream().mapToDouble((item) -> item.getPrice() * item.getQuantity()).sum();
-    }
+	public void setCartItems(List<CartItem> cartItems) {
+		this.cartItems = cartItems;
+	}
+
+	public double calculateTotalPrice() {
+		return this.getCartItems().stream().mapToDouble((item) -> item.getPrice() * item.getQuantity()).sum();
+	}
+
 }

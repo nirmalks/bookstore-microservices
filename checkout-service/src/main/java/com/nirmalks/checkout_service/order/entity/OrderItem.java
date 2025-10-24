@@ -7,87 +7,91 @@ import java.util.Objects;
 
 @Entity
 public class OrderItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    @JsonBackReference
-    private Order order;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "book_id", nullable = false)
-    private Long bookId;
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	@JsonBackReference
+	private Order order;
 
-    @Column(name = "book_title", nullable = false)
-    private String bookTitle;
+	@Column(name = "book_id", nullable = false)
+	private Long bookId;
 
-    public String getBookTitle() {
-        return bookTitle;
-    }
+	@Column(name = "book_title", nullable = false)
+	private String bookTitle;
 
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
-    }
+	public String getBookTitle() {
+		return bookTitle;
+	}
 
-    private double price;
+	public void setBookTitle(String bookTitle) {
+		this.bookTitle = bookTitle;
+	}
 
-    private int quantity;
+	private double price;
 
-    public int getQuantity() {
-        return quantity;
-    }
+	private int quantity;
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	public int getQuantity() {
+		return quantity;
+	}
 
-    public double calculateItemCost() {
-        return this.getPrice() * this.getQuantity();
-    }
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public double calculateItemCost() {
+		return this.getPrice() * this.getQuantity();
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public Order getOrder() {
-        return order;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setOrder(Order order) {
-        this.order = order;
-    }
+	public Order getOrder() {
+		return order;
+	}
 
-    public Long getBookId() {
-        return bookId;
-    }
+	public void setOrder(Order order) {
+		this.order = order;
+	}
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	public Long getBookId() {
+		return bookId;
+	}
 
-    public double getPrice() {
-        return price;
-    }
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
 
-    public void setPrice(double price) {
-        this.price = price;
-    }
+	public double getPrice() {
+		return price;
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderItem orderItem = (OrderItem) o;
-        return Objects.equals(id, orderItem.id);
-    }
+	public void setPrice(double price) {
+		this.price = price;
+	}
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		OrderItem orderItem = (OrderItem) o;
+		return Objects.equals(id, orderItem.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(id);
+	}
+
 }

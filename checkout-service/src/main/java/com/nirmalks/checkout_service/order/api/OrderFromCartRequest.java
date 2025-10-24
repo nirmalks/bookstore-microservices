@@ -4,43 +4,43 @@ import dto.AddressRequest;
 import jakarta.validation.constraints.NotNull;
 
 public class OrderFromCartRequest {
-    @NotNull
-    Long cartId;
-    @NotNull
-    Long userId;
 
-    @NotNull
-    private AddressRequest shippingAddress;
+	@NotNull
+	Long cartId;
 
-    public Long getCartId() {
-        return cartId;
-    }
+	@NotNull
+	Long userId;
 
-    public void setCartId(Long cartId) {
-        this.cartId = cartId;
-    }
+	@NotNull
+	private AddressRequest shippingAddress;
 
-    public Long getUserId() {
-        return userId;
-    }
+	public Long getCartId() {
+		return cartId;
+	}
 
-    public @NotNull AddressRequest getShippingAddress() {
-        return shippingAddress;
-    }
+	public void setCartId(Long cartId) {
+		this.cartId = cartId;
+	}
 
-    public void setShippingAddress(@NotNull AddressRequest shippingAddress) {
-        this.shippingAddress = shippingAddress;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public @NotNull AddressRequest getShippingAddress() {
+		return shippingAddress;
+	}
 
-    @Override
-    public String toString() {
-        return "OrderFromCartRequest{" +
-                "cartId=" + cartId +
-                ", userId=" + userId +
-                '}';
-    }
+	public void setShippingAddress(@NotNull AddressRequest shippingAddress) {
+		this.shippingAddress = shippingAddress;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderFromCartRequest{" + "cartId=" + cartId + ", userId=" + userId + '}';
+	}
+
 }

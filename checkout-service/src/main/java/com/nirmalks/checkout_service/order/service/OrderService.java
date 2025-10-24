@@ -10,13 +10,15 @@ import dto.PageRequestDto;
 import org.springframework.data.domain.Page;
 
 public interface OrderService {
-    OrderResponse createOrder(DirectOrderRequest directOrderRequest);
 
-    OrderResponse createOrder(OrderFromCartRequest orderFromCartRequest);
+	OrderResponse createOrder(DirectOrderRequest directOrderRequest);
 
-    Page<OrderSummaryDto> getOrdersByUser(Long userId, PageRequestDto pageRequestDto);
+	OrderResponse createOrder(OrderFromCartRequest orderFromCartRequest);
 
-    Order getOrder(Long orderId);
+	Page<OrderSummaryDto> getOrdersByUser(Long userId, PageRequestDto pageRequestDto);
 
-    void updateOrderStatus(Long orderId, OrderStatus status);
+	Order getOrder(Long orderId);
+
+	void updateOrderStatus(Long orderId, OrderStatus status);
+
 }

@@ -6,69 +6,71 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderSummaryDto {
-    private Long id;
-    private String status;
-    private LocalDateTime placedDate;
-    private Double totalCost;
-    private List<OrderItemDto> items;
-    private AddressDto address;
 
-    public Long getId() {
-        return id;
-    }
+	private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	private String status;
 
-    public String getStatus() {
-        return status;
-    }
+	private LocalDateTime placedDate;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	private Double totalCost;
 
-    public LocalDateTime getPlacedDate() {
-        return placedDate;
-    }
+	private List<OrderItemDto> items;
 
-    public void setPlacedDate(LocalDateTime placedDate) {
-        this.placedDate = placedDate;
-    }
+	private AddressDto address;
 
-    public Double getTotalCost() {
-        return totalCost;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setTotalCost(Double totalCost) {
-        this.totalCost = totalCost;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public List<OrderItemDto> getItems() {
-        return items;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setItems(List<OrderItemDto> items) {
-        this.items = items;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public AddressDto getAddress() {
-        return address;
-    }
+	public LocalDateTime getPlacedDate() {
+		return placedDate;
+	}
 
-    public void setAddress(AddressDto address) {
-        this.address = address;
-    }
+	public void setPlacedDate(LocalDateTime placedDate) {
+		this.placedDate = placedDate;
+	}
 
-    @Override
-    public String toString() {
-        return "OrderSummaryDto{" +
-                "id=" + id +
-                ", status='" + status + '\'' +
-                ", placedDate=" + placedDate +
-                ", totalCost=" + totalCost +
-                ", items=" + items +
-                '}';
-    }
+	public Double getTotalCost() {
+		return totalCost;
+	}
+
+	public void setTotalCost(Double totalCost) {
+		this.totalCost = totalCost;
+	}
+
+	public List<OrderItemDto> getItems() {
+		return items;
+	}
+
+	public void setItems(List<OrderItemDto> items) {
+		this.items = items;
+	}
+
+	public AddressDto getAddress() {
+		return address;
+	}
+
+	public void setAddress(AddressDto address) {
+		this.address = address;
+	}
+
+	@Override
+	public String toString() {
+		return "OrderSummaryDto{" + "id=" + id + ", status='" + status + '\'' + ", placedDate=" + placedDate
+				+ ", totalCost=" + totalCost + ", items=" + items + '}';
+	}
+
 }

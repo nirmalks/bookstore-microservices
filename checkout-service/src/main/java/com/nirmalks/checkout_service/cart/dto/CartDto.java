@@ -3,40 +3,40 @@ package com.nirmalks.checkout_service.cart.dto;
 import java.math.BigDecimal;
 
 public class CartDto {
-    private Long id;
-    private Long userId;
-    private BigDecimal totalPrice;
 
-    public Long getId() {
-        return id;
-    }
+	private Long id;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	private Long userId;
 
-    public Long getUserId() {
-        return userId;
-    }
+	private BigDecimal totalPrice;
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
+	public Long getUserId() {
+		return userId;
+	}
 
-    @Override
-    public String toString() {
-        return "CartDto{" +
-                "id=" + id +
-                ", userId=" + userId +
-                ", totalPrice=" + totalPrice +
-                '}';
-    }
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public BigDecimal getTotalPrice() {
+		return totalPrice;
+	}
+
+	public void setTotalPrice(BigDecimal totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+
+	@Override
+	public String toString() {
+		return "CartDto{" + "id=" + id + ", userId=" + userId + ", totalPrice=" + totalPrice + '}';
+	}
+
 }

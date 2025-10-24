@@ -95,8 +95,7 @@ public class SecurityConfig {
 					r -> r.path("/api/oauth2/token", "/api/oauth/**")
 						.and()
 						.method("GET", "POST", "PUT", "DELETE")
-						.filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}")
-							.circuitBreaker(c -> c.setName("authServerCB").setFallbackUri("forward:/fallback/auth")))
+						.filters(f -> f.rewritePath("/api/(?<segment>.*)", "/api/${segment}"))
 						.uri("lb://auth-server"))
 			.build();
 	}
