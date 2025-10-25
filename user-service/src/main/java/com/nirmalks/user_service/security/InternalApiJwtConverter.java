@@ -17,10 +17,8 @@ public class InternalApiJwtConverter implements Converter<Jwt, AbstractAuthentic
 	public AbstractAuthenticationToken convert(Jwt jwt) {
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
 			.getRequest();
-		System.out.println(request.getRequestURI());
 		if (request.getRequestURI().startsWith("/api/internal/")) {
 			String clientId = jwt.getClaimAsString("client_id");
-			System.out.println("client id" + clientId);
 			if (!"auth-server-client".equals(clientId)) {
 				throw new RuntimeException("Not authorized for internal endpoint");
 			}

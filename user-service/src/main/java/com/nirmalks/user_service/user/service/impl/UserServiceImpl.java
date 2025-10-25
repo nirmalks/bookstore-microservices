@@ -48,8 +48,6 @@ public class UserServiceImpl implements UserService {
 		String encryptedPassword = SecurityUtils.encode(userRequest.getPassword(), passwordEncoder);
 		userRequest.setPassword(encryptedPassword);
 		User user = UserMapper.toEntity(userRequest, role);
-		System.out.println("role" + role);
-		System.out.println("user" + user);
 		userRepository.save(user);
 		return UserMapper.toResponse(user);
 	}
@@ -57,7 +55,6 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserResponse getUserById(Long id) {
 		User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
-		System.out.println("user by id" + user + " " + id);
 		return UserMapper.toResponse(user);
 	}
 

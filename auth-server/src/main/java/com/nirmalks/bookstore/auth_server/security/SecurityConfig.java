@@ -5,6 +5,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -42,7 +44,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
-
+	private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 	@Bean
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
 			PasswordAuthenticationProvider passwordAuthProvider,
@@ -157,7 +159,7 @@ public class SecurityConfig {
 						context.getClaims().claim("roles", roles);
 					}
 					else {
-						System.err.println("Cannot create JWT: userId or username is null for authenticated user.");
+						logger.error("Cannot create JWT: userId or username is null for authenticated user.");
 					}
 				}
 				// Case for internal client authentication (client credentials grant)
@@ -165,7 +167,7 @@ public class SecurityConfig {
 					String clientId = principal.getName();
 					context.getClaims().claim("client_id", clientId);
 					Set<String> scopes = context.getRegisteredClient().getScopes();
-					System.out.println(
+					logger.debug(
 							"JWT custom claims injected for internal client: " + clientId + " with scopes: " + scopes);
 				}
 			}

@@ -27,12 +27,8 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		System.out.println("JwtHeaderAuthenticationFilter called for: " + request.getRequestURI());
-
 		String userId = request.getHeader("X-User-ID");
-		System.out.println("user id " + userId);
 		String userRolesHeader = request.getHeader("X-User-Roles");
-		System.out.println("user roles" + userRolesHeader);
 
 		if (userId != null && !userId.isEmpty() && userRolesHeader != null && !userRolesHeader.isEmpty()) {
 

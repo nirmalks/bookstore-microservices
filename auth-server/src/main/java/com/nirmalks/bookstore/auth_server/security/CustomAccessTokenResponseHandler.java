@@ -1,6 +1,8 @@
 package com.nirmalks.bookstore.auth_server.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomAccessTokenResponseHandler implements AuthenticationSuccessHandler {
+	private final Logger logger = LoggerFactory.getLogger(CustomAccessTokenResponseHandler.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -40,7 +43,6 @@ public class CustomAccessTokenResponseHandler implements AuthenticationSuccessHa
 			long expiresIn = accessToken.getExpiresAt().getEpochSecond() - accessToken.getIssuedAt().getEpochSecond();
 			output.put("expires_in", expiresIn);
 		}
-		System.out.println("after epirty");
 		// Add custom claims from the provider's additional parameters
 		Map<String, Object> additionalParameters = tokenAuth.getAdditionalParameters();
 		output.putAll(additionalParameters);
@@ -48,7 +50,7 @@ public class CustomAccessTokenResponseHandler implements AuthenticationSuccessHa
 		if (tokenAuth.getRefreshToken() != null) {
 			output.put("refresh_token", tokenAuth.getRefreshToken().getTokenValue());
 		}
-		System.out.println("before resp set" + output);
+		logger.debug("before token resp set in token resp handler" + output);
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json;charset=UTF-8");
 		objectMapper.writeValue(response.getOutputStream(), output);

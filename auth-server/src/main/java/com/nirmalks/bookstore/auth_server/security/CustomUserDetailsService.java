@@ -7,7 +7,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -17,7 +16,6 @@ import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-
 	private final WebClient webClient;
 
 	private final String userServiceBaseUrl;
@@ -39,10 +37,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 		UserDto userDto = userDtoOptional
 			.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-		System.out.println("userdrt n servive" + userDto);
 		GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userDto.getRole().name());
-		System.out.println("auth" + authority);
-		return new CustomUserDetails(userDto.getId(), // Pass the user's ID
+		return new CustomUserDetails(userDto.getId(),
 				userDto.getUsername(), userDto.getHashedPassword(), List.of(authority));
 	}
 

@@ -1,5 +1,7 @@
 package com.nirmalks.bookstore.api_gateway.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -14,10 +16,10 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.stream.Collectors;
 
 public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
-
+	private final Logger logger = LoggerFactory.getLogger(JwtHeaderPropagationFilter.class);
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		System.out.println("JwtHeaderPropagationFilter: Processing path: " + exchange.getRequest().getPath());
+		logger.debug("JwtHeaderPropagationFilter: Processing path: " + exchange.getRequest().getPath());
 
 		return ReactiveSecurityContextHolder.getContext()
 			.filter(context -> context.getAuthentication() != null && context.getAuthentication().isAuthenticated())
@@ -30,13 +32,13 @@ public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
 					String userId = jwt.getSubject();
 					if (userId != null) {
 						builder.header("X-User-ID", userId);
-						System.out.println("Added User ID header: " + userId);
+						logger.debug("Added User ID header in gateway: " + userId);
 					}
 
 					String rolesClaim = "roles";
 					if (jwt.hasClaim(rolesClaim)) {
 						String roles = jwt.getClaimAsString(rolesClaim);
-						System.out.println("roles str" + roles);
+						logger.debug("roles str in gateway" + roles);
 						if (roles != null) {
 							String rolesWithoutBrackets = roles.trim().replace("[", "").replace("]", "");
 							builder.header("X-User-Roles", rolesWithoutBrackets);
