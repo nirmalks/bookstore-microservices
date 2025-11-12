@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomAccessTokenResponseHandler implements AuthenticationSuccessHandler {
+
 	private final Logger logger = LoggerFactory.getLogger(CustomAccessTokenResponseHandler.class);
 
 	private final ObjectMapper objectMapper = new ObjectMapper();

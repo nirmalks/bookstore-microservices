@@ -16,7 +16,9 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.stream.Collectors;
 
 public class JwtHeaderPropagationFilter implements GlobalFilter, Ordered {
+
 	private final Logger logger = LoggerFactory.getLogger(JwtHeaderPropagationFilter.class);
+
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 		logger.debug("JwtHeaderPropagationFilter: Processing path: " + exchange.getRequest().getPath());

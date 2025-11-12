@@ -3,37 +3,41 @@ package exceptions;
 import java.util.List;
 
 public class ErrorResponse {
-    private String message;
-    private int status;
-    private List<String> errors;
 
-    public ErrorResponse(String message, int statusCode, List<String> errors) {
-        this.message = message;
-        this.status = statusCode;
-        this.errors = errors;
-    }
+	private String message;
 
-    public String getMessage() {
-        return message;
-    }
+	private int status;
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
+	private List<String> errors;
 
-    public int getStatus() {
-        return status;
-    }
+	public ErrorResponse(String message, int statusCode, List<String> errors) {
+		this.message = message;
+		this.status = statusCode;
+		this.errors = errors;
+	}
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
+	public String getMessage() {
+		return message;
+	}
 
-    public List<String> getErrors() {
-        return errors;
-    }
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
-    public void setErrors(List<String> errors) {
-        this.errors = errors;
-    }
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public List<String> getErrors() {
+		return errors;
+	}
+
+	public void setErrors(List<String> errors) {
+		this.errors = errors;
+	}
+
 }

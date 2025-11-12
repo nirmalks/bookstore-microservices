@@ -3,32 +3,32 @@ package dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
-    @NotBlank
-    private String username;
 
-    @NotBlank
-    private String password;
+	@NotBlank
+	private String username;
 
-    public @NotBlank String getUsername() {
-        return username;
-    }
+	@NotBlank
+	private String password;
 
-    public void setUsername(@NotBlank String username) {
-        this.username = username;
-    }
+	public @NotBlank String getUsername() {
+		return username;
+	}
 
-    @Override
-    public String toString() {
-        return "LoginRequest{" +
-                "username='" + username + '\'' +
-                '}';
-    }
+	public void setUsername(@NotBlank String username) {
+		this.username = username;
+	}
 
-    public @NotBlank String getPassword() {
-        return password;
-    }
+	@Override
+	public String toString() {
+		return "LoginRequest{" + "username='" + username + '\'' + '}';
+	}
 
-    public void setPassword(@NotBlank String password) {
-        this.password = password;
-    }
+	public @NotBlank String getPassword() {
+		return password;
+	}
+
+	public void setPassword(@NotBlank String password) {
+		this.password = password;
+	}
+
 }

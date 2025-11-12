@@ -44,7 +44,9 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityConfig {
+
 	private final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+
 	@Bean
 	public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http,
 			PasswordAuthenticationProvider passwordAuthProvider,

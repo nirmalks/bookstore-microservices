@@ -1,67 +1,75 @@
 package dto;
 
 public class AddressRequestWithUserId {
-    String city;
-    String state;
-    String country;
-    String pinCode;
-    boolean isDefault = false;
-    String address;
-    Long userId;
 
-    public String getCity() {
-        return city;
-    }
+	String city;
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+	String state;
 
-    public String getState() {
-        return state;
-    }
+	String country;
 
-    public void setState(String state) {
-        this.state = state;
-    }
+	String pinCode;
 
-    public String getCountry() {
-        return country;
-    }
+	boolean isDefault = false;
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
+	String address;
 
-    public String getPinCode() {
-        return pinCode;
-    }
+	Long userId;
 
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
+	public String getCity() {
+		return city;
+	}
 
-    public boolean isDefault() {
-        return isDefault;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setDefault(boolean aDefault) {
-        isDefault = aDefault;
-    }
+	public String getState() {
+		return state;
+	}
 
-    public String getAddress() {
-        return address;
-    }
+	public void setState(String state) {
+		this.state = state;
+	}
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+	public String getCountry() {
+		return country;
+	}
 
-    public Long getUserId() {
-        return userId;
-    }
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+	public String getPinCode() {
+		return pinCode;
+	}
+
+	public void setPinCode(String pinCode) {
+		this.pinCode = pinCode;
+	}
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean aDefault) {
+		isDefault = aDefault;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
 }

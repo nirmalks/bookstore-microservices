@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
+
 	private final WebClient webClient;
 
 	private final String userServiceBaseUrl;
@@ -38,8 +39,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 		UserDto userDto = userDtoOptional
 			.orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 		GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userDto.getRole().name());
-		return new CustomUserDetails(userDto.getId(),
-				userDto.getUsername(), userDto.getHashedPassword(), List.of(authority));
+		return new CustomUserDetails(userDto.getId(), userDto.getUsername(), userDto.getHashedPassword(),
+				List.of(authority));
 	}
 
 }

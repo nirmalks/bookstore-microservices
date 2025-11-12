@@ -39,6 +39,7 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
 	private final OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator;
 
 	private final Logger logger = LoggerFactory.getLogger(PasswordAuthenticationProvider.class);
+
 	public PasswordAuthenticationProvider(OAuth2AuthorizationService authorizationService,
 			OAuth2TokenGenerator<? extends OAuth2Token> tokenGenerator,
 			@Qualifier("userServiceWebClient") WebClient webClient) {
@@ -123,7 +124,8 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
 			throw new BadCredentialsException("Invalid credentials: User service authentication failed.", e);
 		}
 		catch (Exception e) {
-			logger.error("An unexpected error occurred during password authentication in auth server: " + e.getMessage());
+			logger
+				.error("An unexpected error occurred during password authentication in auth server: " + e.getMessage());
 			throw new BadCredentialsException("Invalid credentials", e);
 		}
 	}
