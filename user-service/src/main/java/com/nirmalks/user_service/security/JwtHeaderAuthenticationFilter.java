@@ -31,8 +31,6 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		logger.debug("JwtHeaderAuthenticationFilter called for: {}", request.getRequestURI());
-
 		String userIdHeader = request.getHeader("X-User-ID");
 		String userRolesHeader = request.getHeader("X-User-Roles");
 
@@ -42,8 +40,6 @@ public class JwtHeaderAuthenticationFilter extends OncePerRequestFilter {
 		if (userIdHeader != null && !userIdHeader.isEmpty() && userRolesHeader != null && !userRolesHeader.isEmpty()) {
 			try {
 				Long userId = Long.parseLong(userIdHeader);
-				logger.debug("User ID: {}", userId);
-				logger.debug("User roles: {}", userRolesHeader);
 
 				// Parse the roles string (e.g., "ROLE_ADMIN,ROLE_CUSTOMER") into a
 				// collection
