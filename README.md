@@ -88,3 +88,14 @@ To stop and remove database volumes (reset all data):
 docker-compose down -v
 ```
 
+## Screenshots
+
+### Zipkin
+
+Log with traceid in gateway
+<img width="1875" height="397" alt="gateway-log" src="https://github.com/user-attachments/assets/dce5c59d-b4cc-4dbe-b0f6-1ca65b1a486d" />
+
+Querying by traceid in zipkin
+<img width="1918" height="831" alt="zipkin-trace" src="https://github.com/user-attachments/assets/972b082d-b8ec-4dff-9e15-f46fd07933d3" />
+
+
